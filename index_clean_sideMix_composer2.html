@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0f14" />
+  <title>Animal Flow Daily Generator</title>
+  <style>
+    :root{
+      --bg:#0b0f14;
+      --panel:#0f1622;
+      --text:#e8f0fb;
+      --muted:#9fb0c3;
+      --border:rgba(255,255,255,.10);
+      --accent:rgba(123,220,255,.85);
+      --radius:16px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family:var(--sans); color:var(--text); background:var(--bg);
+      padding:14px; padding-bottom: calc(14px + env(safe-area-inset-bottom));
+    }
+    .wrap{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+    header{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+    h1{margin:0;font-size:18px;letter-spacing:.2px}
+    .sub{color:var(--muted);font-size:12.5px;line-height:1.35;margin-top:6px;max-width:54ch}
+    .topActions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    button{
+      appearance:none; border:1px solid var(--border);
+      background:transparent; color:var(--text);
+      padding:9px 11px; border-radius:12px;
+      font-weight:650; cursor:pointer; font-size:13px;
+      transition: background .15s ease, border-color .15s ease, transform .04s ease;
+    }
+    button:active{transform:translateY(1px)}
+    button.primary{background:rgba(123,220,255,.10); border-color:rgba(123,220,255,.28)}
+    button.good{background:rgba(93,255,179,.10); border-color:rgba(93,255,179,.28)}
+    button.warn{background:rgba(255,209,102,.10); border-color:rgba(255,209,102,.28)}
+    button.bad{background:rgba(255,93,143,.10); border-color:rgba(255,93,143,.28)}
+    button.ghost{opacity:.9}
+    button:disabled{opacity:.55; cursor:not-allowed}
+
+    .grid{display:grid;grid-template-columns:1.35fr .65fr;gap:12px}
+    @media (max-width: 900px){ .grid{grid-template-columns:1fr} }
+
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015));
+      border:1px solid var(--border); border-radius:var(--radius);
+      overflow:hidden;
+    }
+    .hd{
+      padding:12px 12px 10px;
+      border-bottom:1px solid var(--border);
+      display:flex;justify-content:space-between;gap:10px;align-items:flex-start
+    }
+    .hd .left{display:flex;flex-direction:column;gap:3px}
+    .k{color:var(--muted);font-size:12px}
+    .v{font-size:14px}
+    .bd{padding:12px}
+    .tabs{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+    .tab{
+      padding:7px 9px;border-radius:999px;border:1px solid var(--border);
+      background:transparent;color:var(--muted);font-size:12px;cursor:pointer;
+    }
+    .tab.active{color:var(--text);border-color:rgba(123,220,255,.28);background:rgba(123,220,255,.08)}
+    .row{display:flex;gap:10px;flex-wrap:wrap}
+    .pillline{
+      display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;
+      color:var(--muted); font-size:12px;
+    }
+    .pillline b{color:var(--text);font-weight:650}
+    .flowlist{display:flex;flex-direction:column;gap:8px}
+    .step{
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.015);
+      border-radius:14px; padding:9px 11px;
+      display:flex; gap:10px; align-items:flex-start;
+    }
+    .idx{font-family:var(--mono); font-size:12px; color:var(--muted); width:22px; flex:0 0 auto; margin-top:1px}
+    .main{font-size:13px;line-height:1.35}
+    .miniTags{margin-top:4px; display:flex; gap:6px; flex-wrap:wrap}
+    .tag{font-family:var(--mono);font-size:11px;color:var(--muted);border:1px solid var(--border);padding:2px 6px;border-radius:999px}
+
+    .callout{
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:10px 12px;
+      background:rgba(0,0,0,.18);
+      font-family:var(--mono);
+      font-size:12px;
+      line-height:1.45;
+      white-space:pre-wrap;
+    }
+    .timer{
+      font-family:var(--mono);
+      font-size:32px;
+      letter-spacing:1px;
+      margin:10px 0 6px;
+    }
+    .bar{height:8px;border-radius:999px;border:1px solid var(--border);overflow:hidden;background:rgba(255,255,255,.04)}
+    .bar > div{height:100%;width:0%;background:rgba(123,220,255,.28)}
+    .stats{display:flex;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:12px;margin-top:10px}
+    .stats b{color:var(--text)}
+    .hr{height:1px;background:var(--border);margin:12px 0}
+    .kv{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;margin-bottom:10px}
+    .kv label{color:var(--muted);font-size:12px}
+    select,input[type="number"]{
+      width:100%; padding:9px 10px;border-radius:12px;border:1px solid var(--border);
+      background:rgba(0,0,0,.18); color:var(--text); font-size:13px; outline:none;
+    }
+    input[type="checkbox"]{transform:scale(1.05)}
+    details{border:1px solid var(--border); border-radius:14px; overflow:hidden; background:rgba(255,255,255,.01)}
+    summary{cursor:pointer; padding:10px 12px; color:var(--muted); font-size:12px; list-style:none}
+    summary::-webkit-details-marker{display:none}
+    details[open] summary{border-bottom:1px solid var(--border); color:var(--text)}
+    .detailsBody{padding:10px 12px}
+    .hint{color:var(--muted);font-size:12px;line-height:1.35}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Animal Flow Daily Generator</h1>
+      <div class="sub">Daily flow built with L1 + L2 flow language logic (Set bases, movement window checks, energy intent, one feature movement). 5–5–10 runner included.</div>
+      <div class="pillline" id="pillLine"></div>
+    </div>
+    <div class="topActions">
+      <button class="primary" id="btnNew">Generate Today</button>
+      <button class="ghost" id="btnRegen">Regenerate</button>
+      <button class="ghost" id="btnResume">Resume</button>
+    </div>
+  </header>
+
+  <div class="grid">
+    <section class="card">
+      <div class="hd">
+        <div class="left">
+          <div class="k">Today’s Flow</div>
+          <div class="v" id="flowTitle">—</div>
+        </div>
+        <div class="tabs" id="tabs">
+          <div class="tab active" data-tab="pieces">Pieces (5)</div>
+          <div class="tab" data-tab="linked">Linked (5)</div>
+          <div class="tab" data-tab="timed">Timed (10)</div>
+        </div>
+      </div>
+      <div class="bd">
+        <div class="flowlist" id="flowList"></div>
+
+        <div class="hr"></div>
+
+        <div id="modePieces" class="mode">
+          <div class="kv">
+            <label>Reps per step (per side)</label>
+            <select id="piecesReps">
+              <option value="1">1</option>
+              <option value="3" selected>3</option>
+              <option value="5">5</option>
+            </select>
+          </div>
+          <div class="kv">
+            <label>Do both sides (mirror after each step)</label>
+            <input type="checkbox" id="piecesBothSides" checked />
+          </div>
+          <div class="hint">Segment 1 is rep-based: polish each step cleanly before linking.</div>
+        </div>
+
+        <div id="modeLinked" class="mode" style="display:none">
+          <div class="kv">
+            <label>Flows per side</label>
+            <select id="linkedFlows">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3" selected>3</option>
+              <option value="5">5</option>
+            </select>
+          </div>
+          <div class="hint">Segment 2: run the whole flow repeatedly (auto counts + switches).</div>
+        </div>
+
+        <div id="modeTimed" class="mode" style="display:none">
+          <div class="kv">
+            <label>Timer (minutes)</label>
+            <select id="timedMinutes">
+              <option value="6">6</option>
+              <option value="8">8</option>
+              <option value="10" selected>10</option>
+              <option value="12">12</option>
+              <option value="15">15</option>
+            </select>
+          </div>
+          <div class="kv">
+            <label>Micro-break every N flows (0=off)</label>
+            <select id="microBreakN">
+              <option value="0">0</option>
+              <option value="2">2</option>
+              <option value="3" selected>3</option>
+              <option value="4">4</option>
+            </select>
+          </div>
+          <div class="hint">Segment 3: “constant but various motion”. Micro-breaks act as quality resets.</div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="card">
+      <div class="hd">
+        <div class="left">
+          <div class="k">Runner</div>
+          <div class="v" id="runnerTitle">Pieces</div>
+        </div>
+        <div class="row" style="justify-content:flex-end">
+          <span class="tag" id="badgeSeg">SEG 1</span>
+          <span class="tag" id="badgeSide">L</span>
+          <span class="tag" id="badgeStep">STEP 1</span>
+        </div>
+      </div>
+      <div class="bd">
+        <div class="callout" id="calloutBox">Generate a flow to begin.</div>
+
+        <div class="timer" id="bigTimer" style="display:none">10:00</div>
+        <div class="bar" id="progressWrap" style="display:none"><div id="progressBar"></div></div>
+
+        <div class="stats" id="stats" style="display:none">
+          <span>Flows: <b id="statFlows">0</b></span>
+          <span>Reps: <b id="statReps">0</b></span>
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="row">
+          <button class="good" id="btnStart">Start</button>
+          <button class="warn" id="btnPause">Pause</button>
+          <button class="bad" id="btnReset">Reset</button>
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="row">
+          <button id="btnPrev">Prev</button>
+          <button class="primary" id="btnNext">Next</button>
+          <button id="btnRep">Rep +1</button>
+        </div>
+
+        <div class="hr"></div>
+
+        <details>
+          <summary>Settings</summary>
+          <div class="detailsBody">
+            <div class="kv">
+              <label>Side mixing</label>
+              <select id="sideMode">
+                <option value="flow" selected>Per flow (all same side)</option>
+                <option value="alt">Alternate (L/R each sideable step)</option>
+                <option value="shuffle">Shuffle (safe)</option>
+              </select>
+            </div>
+
+            <div class="kv">
+              <label>Sound (beeps)</label>
+              <input type="checkbox" id="soundOn" checked />
+            </div>
+            <div class="kv">
+              <label>Wake Lock</label>
+              <input type="checkbox" id="wakeOn" checked />
+            </div>
+            <div class="kv">
+              <label>Include Hand Balancing (Advanced)</label>
+              <input type="checkbox" id="hbOn" />
+            </div>
+
+            <details style="margin-top:10px">
+              <summary>History (last 7)</summary>
+              <div class="detailsBody">
+                <div class="hint" id="historyBox">—</div>
+                <div class="hr"></div>
+                <button class="ghost" id="btnClear">Clear history</button>
+              </div>
+            </details>
+
+            <div class="hr"></div>
+            <div class="hint">
+              Composer 2.0 is enabled (hidden daily style rotation for variety: creative/athletic/technical/grounded). UI stays clean.
+            </div>
+          </div>
+        </details>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>
+/* ===========================
+   Storage keys
+=========================== */
+const LS = {
+  HISTORY: "afdg_history_v3",
+  TODAY:   "afdg_today_v3",
+  SESSION: "afdg_session_v3",
+  SETTINGS:"afdg_settings_v3",
+};
+
+/* ===========================
+   Seeded RNG
+=========================== */
+function mulberry32(a){
+  return function(){
+    let t = a += 0x6D2B79F5;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function hashStrToSeed(str){
+  let h = 2166136261;
+  for (let i=0;i<str.length;i++){
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+function todayISO(){
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth()+1).padStart(2,"0");
+  const dd = String(d.getDate()).padStart(2,"0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+function clamp(n,min,max){ return Math.max(min, Math.min(max,n)); }
+function deepCopy(x){ return JSON.parse(JSON.stringify(x)); }
+function choice(rng, arr){ return arr[Math.floor(rng()*arr.length)]; }
+function choiceExcluding(rng, arr, exclude){
+  const pool = arr.filter(x => x !== exclude);
+  return pool.length ? choice(rng, pool) : choice(rng, arr);
+}
+
+/* ===========================
+   Audio beeps
+=========================== */
+let audioCtx = null;
+function beep(freq=880, ms=80){
+  if (!ui.soundOn.checked) return;
+  try{
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = "sine";
+    o.frequency.value = freq;
+    g.gain.value = 0.05;
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start();
+    setTimeout(()=>{ o.stop(); }, ms);
+  }catch(e){}
+}
+
+/* ===========================
+   Wake Lock
+=========================== */
+let wakeLock = null;
+async function acquireWakeLock(){
+  if (!("wakeLock" in navigator)) return;
+  if (!ui.wakeOn.checked) return;
+  try{
+    wakeLock = await navigator.wakeLock.request("screen");
+  }catch(e){}
+}
+async function releaseWakeLock(){
+  try{ await wakeLock?.release(); }catch(e){}
+  wakeLock = null;
+}
+document.addEventListener("visibilitychange", ()=>{
+  if (document.visibilityState === "visible") acquireWakeLock();
+});
+
+/* ===========================
+   Domain model (L1 + selected L2)
+=========================== */
+const BASES = ["CRAB","BEAST","DEEP_APE","LOADED_BEAST"];
+const BASE_LABEL = { CRAB:"Crab", BEAST:"Beast", DEEP_APE:"Deep Ape", LOADED_BEAST:"Loaded Beast" };
+
+const INTENTS = ["ROLL","REDIRECT","TRAVEL","LOW","ROTATION"];
+const INTENT_LABEL = {
+  ROLL:"Energy Roll", REDIRECT:"Energy Redirect", TRAVEL:"Traveling", LOW:"Low Ground", ROTATION:"Rotational"
+};
+
+const FEATURES = ["CRAB_REACH","BEAST_REACH","SCORPION_REACH","WAVE_UNLOAD","APE_REACH"];
+const HB_FEATURES = ["TUCK_BALANCE"]; // gated
+
+// Move vector groups (for “sentence” feel)
+const GROUP = {
+  FRONT: new Set(["FSTEP","FST","FKT"]),
+  SIDE:  new Set(["SKT","JSKT","LSKT"]),
+  SWITCH:new Set(["US","UST","SS","FS","RUS","USA","RT","CR","PO"]),
+  TRAVEL:new Set(["BEAR"]),
+};
+
+const MOVES = {
+  // SET
+  SET_CRAB: { id:"SET_CRAB", name:"Set Crab", type:"SET", to:["CRAB"], sideable:false, tags:["LOW"] },
+  SET_BEAST:{ id:"SET_BEAST", name:"Set Beast", type:"SET", to:["BEAST"], sideable:false, tags:["LOW"] },
+  SET_APE:  { id:"SET_APE", name:"Set Deep Ape", type:"SET", to:["DEEP_APE"], sideable:false, tags:["LOW","ROTATION"] },
+  SET_LB:   { id:"SET_LB", name:"Set Loaded Beast", type:"SET", to:["LOADED_BEAST"], sideable:false, tags:["LOW"] },
+
+  // L1 S&T core
+  US:   { id:"US", name:"Underswitch", type:"ST", from:["CRAB","BEAST","LOADED_BEAST"], to:["BEAST","CRAB","LOADED_BEAST"], sideable:true, limb:"L", opensWindow:true, requiresWindow:false, tags:["ROLL","ROTATION","LOW"] },
+  UST:  { id:"UST", name:"Underswitch Tap", type:"ST", from:["CRAB","BEAST"], to:["CRAB","BEAST"], sideable:true, limb:"L", opensWindow:true, requiresWindow:false, tags:["ROLL","LOW"] },
+  SKT:  { id:"SKT", name:"Side Kickthrough", type:"ST", from:["BEAST","LOADED_BEAST"], to:["BEAST","LOADED_BEAST"], sideable:true, limb:"L", requiresWindow:true, tags:["REDIRECT","ROTATION"] },
+  JSKT: { id:"JSKT", name:"Jumping Side Kickthrough", type:"ST", from:["BEAST"], to:["BEAST"], sideable:true, limb:"L", requiresWindow:true, tags:["REDIRECT","TRAVEL"] },
+  LSKT: { id:"LSKT", name:"Levitating Side Kickthrough", type:"ST", from:["BEAST"], to:["BEAST"], sideable:true, limb:"L", requiresWindow:true, tags:["REDIRECT","LOW"] },
+  SS:   { id:"SS", name:"Scorpion Switch", type:"ST", from:["BEAST"], to:["CRAB"], sideable:true, limb:"L", opensWindow:true, requiresWindow:false, tags:["ROLL","ROTATION"] },
+  FS:   { id:"FS", name:"Full Scorpion", type:"ST", from:["CRAB"], to:["CRAB"], sideable:true, limb:"L", opensWindow:true, requiresWindow:false, tags:["ROLL","ROTATION"] },
+  FSTEP:{ id:"FSTEP", name:"Front Step", type:"ST", from:["LOADED_BEAST","CRAB"], to:["LOADED_BEAST","CRAB"], sideable:true, limb:"L", opensWindow:true, requiresWindow:false, tags:["TRAVEL","LOW"] },
+  FST:  { id:"FST", name:"Front Step Through", type:"ST", from:["LOADED_BEAST","CRAB"], to:["LOADED_BEAST","CRAB"], sideable:true, limb:"L", opensWindow:true, requiresWindow:false, tags:["TRAVEL","LOW"] },
+  FKT:  { id:"FKT", name:"Front Kickthrough", type:"ST", from:["LOADED_BEAST","CRAB"], to:["LOADED_BEAST","CRAB"], sideable:true, limb:"L", requiresWindow:true, tags:["REDIRECT","TRAVEL"] },
+
+  // FSS
+  CRAB_REACH:    { id:"CRAB_REACH", name:"Crab Reach", type:"FSS", from:["CRAB"], to:["CRAB"], sideable:true, limb:"A", tags:["BREAK","LOW"] },
+  BEAST_REACH:   { id:"BEAST_REACH", name:"Beast Reach", type:"FSS", from:["BEAST","LOADED_BEAST"], to:["BEAST","LOADED_BEAST"], sideable:true, limb:"A", tags:["BREAK","LOW"] },
+  SCORPION_REACH:{ id:"SCORPION_REACH", name:"Scorpion Reach", type:"FSS", from:["LOADED_BEAST"], to:["LOADED_BEAST"], sideable:true, limb:"L", tags:["BREAK","ROTATION"] },
+  WAVE_UNLOAD:   { id:"WAVE_UNLOAD", name:"Wave Unload", type:"FSS", from:["LOADED_BEAST"], to:["LOADED_BEAST"], sideable:false, tags:["BREAK","LOW"] },
+  APE_REACH:     { id:"APE_REACH", name:"Ape Reach", type:"FSS", from:["DEEP_APE"], to:["DEEP_APE"], sideable:false, tags:["BREAK","LOW"] },
+
+  // Selected L2 S&T additions
+  RUS:  { id:"RUS", name:"Reaching Underswitch", type:"ST", from:["DEEP_APE"], to:["CRAB"], sideable:true, limb:"L", opensWindow:true, requiresWindow:false, tags:["ROLL","ROTATION"] },
+  USA:  { id:"USA", name:"Underswitch to Deep Ape", type:"ST", from:["CRAB"], to:["DEEP_APE"], sideable:true, limb:"L", opensWindow:true, requiresWindow:false, tags:["ROLL","ROTATION"] },
+  CR:   { id:"CR", name:"Crocodile Roll", type:"ST", from:["BEAST","LOADED_BEAST"], to:["BEAST","LOADED_BEAST"], sideable:true, limb:"Sd", requiresWindow:false, tags:["ROLL","LOW","ROTATION"] },
+  PO:   { id:"PO", name:"Pop Out", type:"ST", from:["BEAST","LOADED_BEAST"], to:["DEEP_APE"], sideable:true, limb:"Sd", requiresWindow:false, tags:["REDIRECT","ROTATION"] },
+  RT:   { id:"RT", name:"Roll Through", type:"ST", from:["CRAB"], to:["BEAST"], sideable:true, limb:"L", opensWindow:true, requiresWindow:false, tags:["ROLL","ROTATION"] },
+
+  // L2 Traveling starter
+  BEAR: { id:"BEAR", name:"Bear (Travel)", type:"TF", from:["BEAST"], to:["BEAST"], sideable:false, tags:["TRAVEL"] },
+
+  // Advanced gated
+  TUCK_BALANCE: { id:"TUCK_BALANCE", name:"Tuck Balance (Skill)", type:"HB", from:["BEAST"], to:["BEAST"], sideable:false, tags:["BREAK"], gated:true }
+};
+
+// conservative adjacency by base
+const ALLOWED = {
+  CRAB: ["US","UST","FS","FSTEP","FST","FKT","CRAB_REACH","USA","RT","SET_CRAB","SET_BEAST","SET_LB","SET_APE"],
+  BEAST:["US","UST","SKT","JSKT","LSKT","SS","BEAST_REACH","FSTEP","FST","FKT","CR","PO","BEAR","SET_BEAST","SET_CRAB","SET_LB","SET_APE"],
+  LOADED_BEAST:["US","SKT","BEAST_REACH","SCORPION_REACH","WAVE_UNLOAD","FSTEP","FST","FKT","CR","PO","SET_LB","SET_BEAST","SET_CRAB","SET_APE"],
+  DEEP_APE:["RUS","APE_REACH","SET_APE","SET_CRAB","SET_BEAST","SET_LB"]
+};
+
+/* ===========================
+   Persistence helpers
+=========================== */
+function getHistory(){ try{ return JSON.parse(localStorage.getItem(LS.HISTORY) || "[]"); }catch(e){ return []; } }
+function setHistory(h){ localStorage.setItem(LS.HISTORY, JSON.stringify(h)); }
+function pushHistory(entry){
+  const h=getHistory(); h.unshift(entry);
+  while(h.length>14) h.pop();
+  setHistory(h);
+}
+function getSettings(){ try{ return JSON.parse(localStorage.getItem(LS.SETTINGS) || "{}"); }catch(e){ return {}; } }
+function setSettings(s){ localStorage.setItem(LS.SETTINGS, JSON.stringify(s)); }
+function getTodayFlow(){ try{ return JSON.parse(localStorage.getItem(LS.TODAY) || "null"); }catch(e){ return null; } }
+function setTodayFlow(flow){ localStorage.setItem(LS.TODAY, JSON.stringify(flow)); }
+function loadSession(){ try{ return JSON.parse(localStorage.getItem(LS.SESSION) || "null"); }catch(e){ return null; } }
+
+function saveSession(){
+  const pack = {
+    runner,
+    flow: currentFlow,
+    ui: {
+      tab: ui.currentTab,
+      piecesReps: ui.piecesReps.value,
+      piecesBothSides: ui.piecesBothSides.checked,
+      linkedFlows: ui.linkedFlows.value,
+      timedMinutes: ui.timedMinutes.value,
+      microBreakN: ui.microBreakN.value,
+      sideMode: ui.sideMode.value
+    }
+  };
+  try{ localStorage.setItem(LS.SESSION, JSON.stringify(pack)); }catch(e){}
+}
+
+/* ===========================
+   Composer 2.0: hidden daily style
+=========================== */
+const STYLES = ["CREATIVE","ATHLETIC","TECHNICAL","GROUNDED"]; // hidden
+function pickDailyStyle(rng){
+  const h=getHistory();
+  const y=h[0] || null;
+  const style = choiceExcluding(rng, STYLES, y?.style || null);
+  return style;
+}
+
+function pickDailyAnchors(rng, hbEnabled){
+  const h=getHistory();
+  const y=h[0] || null;
+  const base = choiceExcluding(rng, BASES, y?.base || null);
+  const featurePool = hbEnabled ? FEATURES.concat(HB_FEATURES) : FEATURES.slice();
+  const feature = choiceExcluding(rng, featurePool, y?.feature || null);
+  const intent = choiceExcluding(rng, INTENTS, y?.intent || null);
+  const style = pickDailyStyle(rng);
+  return { base, feature, intent, style };
+}
+
+/* ===========================
+   Flow state + legality
+=========================== */
+function makeState(homeBase, startSide){
+  return {
+    homeBase,
+    base: homeBase,
+    windowOpen:false,
+    lastMoveId:null,
+    lastSide:startSide,
+    sideStreak:1,
+    lastEnergy:null,
+    lastGroup:null,
+    stepCount:0,
+    stStreak:0,
+    energyCounts: {ROLL:0, REDIRECT:0, TRAVEL:0, LOW:0, ROTATION:0, BREAK:0},
+    baseCounts: {CRAB:0, BEAST:0, DEEP_APE:0, LOADED_BEAST:0},
+    usedMove: new Set(),
+    usedPair: new Set(), // moveId+side
+    hasTravel:false,
+    usedFeature:false,
+  };
+}
+
+function getGroup(moveId){
+  if (GROUP.FRONT.has(moveId)) return "FRONT";
+  if (GROUP.SIDE.has(moveId)) return "SIDE";
+  if (GROUP.SWITCH.has(moveId)) return "SWITCH";
+  if (GROUP.TRAVEL.has(moveId)) return "TRAVEL";
+  const t = MOVES[moveId]?.type;
+  if (t==="FSS") return "FEATURE";
+  if (t==="SET") return "SET";
+  return "OTHER";
+}
+
+function canUseMove(state, moveId, hbEnabled){
+  const m = MOVES[moveId];
+  if (!m) return false;
+  if (m.gated && !hbEnabled) return false;
+  if (m.type !== "SET" && !(ALLOWED[state.base]||[]).includes(moveId)) return false;
+  if (m.from && m.from.length && !m.from.includes(state.base)) return false;
+  if (m.requiresWindow && !state.windowOpen) return false;
+
+  // avoid immediate repetition
+  if (state.lastMoveId === moveId) return false;
+
+  // avoid repeating exact move+side too much (variety)
+  return true;
+}
+
+function applyMove(state, moveId, side){
+  const m = MOVES[moveId];
+  state.lastMoveId = moveId;
+  state.stepCount++;
+
+  // side tracking
+  if (side){
+    if (side === state.lastSide) state.sideStreak++;
+    else { state.lastSide = side; state.sideStreak = 1; }
+    state.usedPair.add(moveId + ":" + side);
+  }
+
+  // window logic
+  if (m.opensWindow) state.windowOpen = true;
+  if (moveId === "SKT" || moveId === "JSKT" || moveId === "LSKT") state.windowOpen = false;
+
+  // base change
+  if (m.to && m.to.length){
+    if (moveId === "RUS") state.base = "CRAB";
+    else if (moveId === "USA") state.base = "DEEP_APE";
+    else if (moveId === "RT") state.base = "BEAST";
+    else if (moveId === "PO") state.base = "DEEP_APE";
+    else state.base = m.to[0];
+  }
+
+  state.baseCounts[state.base] = (state.baseCounts[state.base]||0) + 1;
+
+  // tags / energy
+  const tags = m.tags || [];
+  for (const t of tags){
+    if (state.energyCounts[t] != null) state.energyCounts[t] += 1;
+    if (t === "TRAVEL") state.hasTravel = true;
+  }
+  // treat FSS as BREAK-ish (manual “energy breaks”)
+  if (m.type === "FSS" || m.type === "HB") state.energyCounts.BREAK += 1;
+
+  // group
+  state.lastGroup = getGroup(moveId);
+
+  // ST streak
+  if (m.type === "ST") state.stStreak++;
+  else state.stStreak = 0;
+
+  state.usedMove.add(moveId);
+  if (m.type === "FSS" || m.type === "HB") state.usedFeature = true;
+}
+
+/* ===========================
+   Side assignment within flow (user setting)
+=========================== */
+function makeSidePicker(rng, startSide){
+  const mode = ui.sideMode?.value || "flow";
+  let last = startSide;
+  let same = 0;
+  return function pickSide(){
+    if (mode === "flow") return startSide;
+    if (mode === "alt"){
+      last = (last === "L") ? "R" : "L";
+      return last;
+    }
+    // shuffle safe
+    const r = (rng() < 0.5) ? "L" : "R";
+    if (r === last) same++; else { last = r; same = 1; }
+    if (same >= 3){
+      last = (last === "L") ? "R" : "L";
+      same = 1;
+    }
+    return last;
+  };
+}
+
+/* ===========================
+   Scoring rules (Composer 2.0)
+=========================== */
+const STYLE_W = {
+  CREATIVE:  {variety:3.0, travel:1.2, technical:1.3, density:1.2, grounded:1.0},
+  ATHLETIC:  {variety:1.5, travel:2.4, technical:1.0, density:2.2, grounded:0.8},
+  TECHNICAL: {variety:1.2, travel:1.0, technical:2.6, density:1.0, grounded:1.0},
+  GROUNDED:  {variety:1.3, travel:0.9, technical:1.2, density:1.0, grounded:2.6},
+};
+
+function scoreCandidate(prevState, moveId, side, plan){
+  const m = MOVES[moveId];
+  const style = plan.style;
+  const w = STYLE_W[style] || STYLE_W.CREATIVE;
+
+  let s = 0;
+
+  // prefer ST in the “sentence” body; avoid SET unless needed
+  if (m.type === "ST") s += 2.2 * w.density;
+  if (m.type === "TF") s += 2.0 * w.travel;
+  if (m.type === "FSS") s += 1.2 * w.variety;
+  if (m.type === "SET") s -= 2.5 * w.technical;
+
+  // intent alignment
+  if (m.tags?.includes(plan.intent)) s += 2.4;
+  // also allow intent “ROTATION” to count for ROLL-ish moves
+  if (plan.intent === "ROTATION" && (m.tags?.includes("ROLL") || m.tags?.includes("ROTATION"))) s += 1.0;
+
+  // energy wave: avoid repeating the same energy tag back-to-back, especially REDIRECT
+  // we approximate “energy” as the first matching tag among ROLL/REDIRECT/TRAVEL/LOW/ROTATION/BREAK
+  const energy = (m.type==="FSS"||m.type==="HB") ? "BREAK" :
+    (m.tags?.find(t => ["ROLL","REDIRECT","TRAVEL","LOW","ROTATION"].includes(t)) || null);
+
+  if (energy && prevState.lastEnergy){
+    if (energy === prevState.lastEnergy) s -= 2.0 * w.variety;
+    if (energy === "REDIRECT" && prevState.lastEnergy === "REDIRECT") s -= 5.0; // big no-no
+  }
+  // encourage change after a redirect
+  if (prevState.lastEnergy === "REDIRECT" && energy && energy !== "REDIRECT") s += 1.4;
+
+  // limb logic / side logic:
+  if (m.sideable && side){
+    // discourage long streak same side
+    if (prevState.lastSide === side && prevState.sideStreak >= 2) s -= 1.8 * w.variety;
+    // discourage repeating exact move+side
+    if (prevState.usedPair.has(moveId + ":" + side)) s -= 2.0 * w.variety;
+  }
+
+  // group variation (sentence feel)
+  const g = getGroup(moveId);
+  if (g === prevState.lastGroup && g !== "SWITCH") s -= 1.6 * w.variety;
+  if (g !== prevState.lastGroup && prevState.lastGroup) s += 0.8 * w.variety;
+
+  // Base drift: avoid staying too much in home base (especially on CREATIVE)
+  const home = prevState.homeBase;
+  const homeRatio = (prevState.baseCounts[home] || 0) / Math.max(1, prevState.stepCount);
+  if (prevState.stepCount >= 3 && prevState.base === home && homeRatio > 0.62){
+    s -= 2.0 * w.variety;
+  }
+
+  // Grounded style prefers LOW and fewer big redirects
+  if (style === "GROUNDED"){
+    if (m.tags?.includes("LOW")) s += 1.5;
+    if (m.tags?.includes("TRAVEL")) s -= 0.6;
+    if (m.tags?.includes("REDIRECT")) s -= 0.6;
+  }
+
+  // Athletic style wants more ST density before the feature and at least 1 travel on TRAVEL intent
+  if (style === "ATHLETIC"){
+    if (prevState.stepCount <= 4 && m.type === "FSS") s -= 1.6; // delay break
+  }
+
+  // Technical style: reward “clean” switches and avoid jumpy stuff
+  if (style === "TECHNICAL"){
+    if (moveId === "JSKT") s -= 1.2;
+    if (moveId === "LSKT") s -= 0.6;
+    if (g === "SWITCH") s += 1.2;
+  }
+
+  // prefer non-SET resolve near end
+  if (plan.phase === "RESOLVE"){
+    if (m.type === "SET") s -= 1.5;
+    if (m.type === "ST") s += 1.1;
+  }
+
+  // discourage using the feature too early
+  if (moveId === plan.feature && plan.phase !== "FEATURE") s -= 6.0;
+
+  // ensure only one feature: penalize additional breaks
+  if (prevState.usedFeature && (m.type === "FSS" || m.type === "HB")) s -= 9.0;
+
+  // mild diversity reward
+  if (!prevState.usedMove.has(moveId)) s += 0.5 * w.variety;
+
+  return {score:s, energy, group:g};
+}
+
+/* ===========================
+   Callout (L2 language)
+=========================== */
+function makeCallOut(moveId, side="L"){
+  const m = MOVES[moveId];
+  if (!m) return "—";
+  if (m.type === "SET") return m.name;
+  if (!m.sideable) return m.name;
+
+  const dir = side === "R" ? "Right" : "Left";
+  const limb = (m.limb === "Sd") ? "Side" : (m.limb === "A" ? "Arm" : "Leg");
+  return `${dir} ${limb} ${m.name}`;
+}
+
+/* ===========================
+   Composer 2.0: Beam search
+=========================== */
+function setIdForBase(base){
+  return base==="CRAB"?"SET_CRAB":base==="BEAST"?"SET_BEAST":base==="LOADED_BEAST"?"SET_LB":"SET_APE";
+}
+
+function enumerateMoves(state, hbEnabled, plan){
+  // primary pool: allowed in this base
+  const basePool = (ALLOWED[state.base] || []).filter(id => canUseMove(state, id, hbEnabled));
+  // allow Set options only as “escape hatches”
+  const setPool = ["SET_CRAB","SET_BEAST","SET_LB","SET_APE"].filter(id => canUseMove(state, id, hbEnabled));
+  // reduce SET spam: only offer setPool if basePool is small or resolve phase
+  if (plan.phase === "RESOLVE" || basePool.length <= 3) return basePool.concat(setPool);
+  return basePool;
+}
+
+function wantsTravel(plan){
+  // only “hard require” if intent is TRAVEL OR style ATHLETIC, but we keep it soft if the move set is limited
+  return (plan.intent === "TRAVEL") || (plan.style === "ATHLETIC");
+}
+
+function composeFlow2({base, feature, intent, style, seedKey, hbEnabled}){
+  const rng = mulberry32(hashStrToSeed(seedKey));
+  const startSide = rng() < 0.5 ? "L" : "R";
+  const pickSide = makeSidePicker(rng, startSide);
+
+  // Plan: 7–9 steps total
+  const targetLen = 7 + Math.floor(rng()*3); // 7..9
+  const featureIndex = clamp(targetLen - 2, 5, targetLen - 2); // place feature near the end
+
+  // phases per index
+  function phaseAt(i){
+    if (i === 0) return "SET";
+    if (i === featureIndex) return "FEATURE";
+    if (i === targetLen - 1) return "RESOLVE";
+    if (i === 1) return "ENTRY";
+    if (i <= 3) return "DEVELOP";
+    return "REDIRECT";
+  }
+
+  const plan = {base, feature, intent, style, targetLen, featureIndex, phase:"SET"};
+
+  // Beam node: {state, steps, totalScore}
+  const startState = makeState(base, startSide);
+  const startSteps = [];
+  // hard start with Set home base
+  const homeSet = setIdForBase(base);
+  startSteps.push({moveId:homeSet, side:null});
+  applyMove(startState, homeSet, null);
+  startState.lastEnergy = "LOW";
+  startState.baseCounts[base] = 1;
+
+  let beam = [{state:startState, steps:startSteps, total:0}];
+  const BEAM_W = 10;
+
+  for (let i=1; i<targetLen; i++){
+    plan.phase = phaseAt(i);
+    const nextBeam = [];
+
+    for (const node of beam){
+      const st = node.state;
+
+      // enforce “feature exactly once” at featureIndex
+      let candidates = [];
+      if (plan.phase === "FEATURE"){
+        candidates = [feature].filter(id => canUseMove(st, id, hbEnabled));
+        if (!candidates.length){
+          // if feature not legal, insert a Set to its required base, then feature (handled by beam naturally):
+          const feat = MOVES[feature];
+          const targetBase = (feat?.from && feat.from[0]) ? feat.from[0] : st.base;
+          candidates = [setIdForBase(targetBase)].filter(id => canUseMove(st, id, hbEnabled));
+        }
+      } else {
+        candidates = enumerateMoves(st, hbEnabled, plan)
+          .filter(id => id !== feature); // prevent early feature
+      }
+
+      for (const moveId of candidates){
+        const m = MOVES[moveId];
+        const side = m.sideable ? pickSide() : null;
+
+        // hard-ish constraint: avoid 3 same-side sideable moves in a row
+        if (m.sideable && side && st.lastSide === side && st.sideStreak >= 3) continue;
+
+        // hard-ish constraint: avoid same group + side repetition pattern on ST
+        const g = getGroup(moveId);
+        if (m.type === "ST" && st.lastGroup === g && g !== "SWITCH" && st.lastSide === side) continue;
+
+        // score
+        const sc = scoreCandidate(st, moveId, side, plan);
+
+        // clone
+        const st2 = deepCopyState(st);
+        st2.lastEnergy = sc.energy || st2.lastEnergy;
+        applyMove(st2, moveId, side);
+        st2.lastEnergy = sc.energy || st2.lastEnergy;
+
+        const steps2 = node.steps.concat([{moveId, side}]);
+        nextBeam.push({state:st2, steps:steps2, total: node.total + sc.score});
+      }
+    }
+
+    // keep best N
+    nextBeam.sort((a,b)=> b.total - a.total);
+    beam = nextBeam.slice(0, BEAM_W);
+
+    // fail-safe: if beam collapses (shouldn't), fall back to simple set
+    if (!beam.length){
+      const fallback = deepCopyState(startState);
+      const steps = deepCopy(startSteps);
+      steps.push({moveId:homeSet, side:null});
+      applyMove(fallback, homeSet, null);
+      beam = [{state:fallback, steps, total:-10}];
+    }
+  }
+
+  // choose best with end constraints:
+  // - try to end at home base
+  // - try to include travel if desired
+  let best = null;
+  for (const node of beam){
+    let bonus = 0;
+    if (node.state.base === base) bonus += 3;
+    if (wantsTravel(plan) && node.state.hasTravel) bonus += 2;
+    if (node.state.energyCounts.BREAK === 1) bonus += 1;
+    if (node.state.energyCounts.BREAK > 1) bonus -= 4;
+    const total = node.total + bonus;
+    if (!best || total > best.total) best = {steps:node.steps, total, state:node.state};
+  }
+
+  // If we don't end at home, append a resolve step:
+  const steps = best.steps.slice();
+  const finalState = best.state;
+  if (finalState.base !== base){
+    // try a movement-based return first (ST candidates that can land us home)
+    const returnPool = enumerateMoves(finalState, hbEnabled, { ...plan, phase:"RESOLVE" })
+      .filter(id => MOVES[id]?.type === "ST");
+    let added = false;
+    for (const id of returnPool){
+      const stTmp = deepCopyState(finalState);
+      const side = MOVES[id].sideable ? pickSide() : null;
+      if (!canUseMove(stTmp, id, hbEnabled)) continue;
+      applyMove(stTmp, id, side);
+      if (stTmp.base === base){
+        steps.push({moveId:id, side});
+        added = true;
+        break;
+      }
+    }
+    if (!added){
+      steps.push({moveId:setIdForBase(base), side:null});
+    }
+  }
+
+  // Add/trim to 6–10
+  while (steps.length < 6){
+    steps.splice(steps.length-1, 0, {moveId:"UST", side: startSide});
+  }
+  if (steps.length > 10) steps.splice(10);
+
+  return {
+    date: todayISO(),
+    seedKey,
+    base,
+    feature,
+    intent,
+    style, // stored in history but not shown in UI
+    startSide,
+    steps,
+  };
+}
+
+// Deep copy for state with Sets preserved
+function deepCopyState(st){
+  const c = {
+    homeBase: st.homeBase,
+    base: st.base,
+    windowOpen: st.windowOpen,
+    lastMoveId: st.lastMoveId,
+    lastSide: st.lastSide,
+    sideStreak: st.sideStreak,
+    lastEnergy: st.lastEnergy,
+    lastGroup: st.lastGroup,
+    stepCount: st.stepCount,
+    stStreak: st.stStreak,
+    energyCounts: {...st.energyCounts},
+    baseCounts: {...st.baseCounts},
+    usedMove: new Set(Array.from(st.usedMove)),
+    usedPair: new Set(Array.from(st.usedPair)),
+    hasTravel: st.hasTravel,
+    usedFeature: st.usedFeature,
+  };
+  return c;
+}
+
+function mirrorFlow(flow){
+  const mirrored = deepCopy(flow);
+  mirrored.startSide = flow.startSide==="L"?"R":"L";
+  mirrored.steps = flow.steps.map(s=>{
+    const m = MOVES[s.moveId];
+    if (m?.sideable && s.side){
+      return {...s, side: (s.side==="L"?"R":"L")};
+    }
+    return {...s};
+  });
+  return mirrored;
+}
+
+/* ===========================
+   Runner
+=========================== */
+const runner = {
+  mode:"pieces",
+  running:false,
+  segment:1,
+  side:"L",
+  stepIndex:0,
+  reps:0,
+  flowsDone:0,
+  timerTotal:600,
+  timerLeft:600,
+  tHandle:null,
+  microBreakN:3,
+};
+
+function formatTime(sec){
+  sec = Math.max(0, Math.floor(sec));
+  const m = Math.floor(sec/60);
+  const s = sec%60;
+  return `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+}
+function stopTimer(){ if (runner.tHandle) clearInterval(runner.tHandle); runner.tHandle=null; }
+function startTimer(){
+  stopTimer();
+  runner.tHandle = setInterval(()=>{
+    if (!runner.running) return;
+    runner.timerLeft--;
+    if (runner.timerLeft === 10) beep(900,90);
+    if (runner.timerLeft === 5) beep(1000,90);
+    if (runner.timerLeft <= 0){
+      runner.timerLeft = 0;
+      runner.running = false;
+      beep(1400,250);
+      stopTimer();
+    }
+    saveSession();
+    renderRunner();
+  }, 1000);
+}
+function resetRunner(full=true){
+  stopTimer();
+  runner.running=false;
+  runner.side = currentFlow?.startSide || "L";
+  runner.stepIndex=0;
+  runner.reps=0;
+  runner.flowsDone=0;
+
+  const mins = parseInt(ui.timedMinutes.value,10);
+  runner.timerTotal = mins*60;
+  runner.timerLeft = runner.timerTotal;
+  runner.microBreakN = parseInt(ui.microBreakN.value,10);
+
+  ui.bigTimer.style.display = (runner.mode==="timed") ? "" : "none";
+  ui.progressWrap.style.display = (runner.mode==="timed") ? "" : "none";
+  ui.stats.style.display = currentFlow ? "" : "none";
+
+  if (full) beep(660,70);
+  saveSession();
+}
+function getActiveFlow(){
+  if (!currentFlow) return null;
+  const mode = ui.sideMode?.value || "flow";
+  if (mode !== "flow") return currentFlow;
+  return (runner.side === currentFlow.startSide) ? currentFlow : mirrorFlow(currentFlow);
+}
+
+function startRunner(){
+  if (!currentFlow) return;
+  runner.running=true;
+  beep(880,80);
+  if (runner.mode==="timed") startTimer();
+  saveSession();
+}
+function pauseRunner(){
+  runner.running=false;
+  beep(440,80);
+  stopTimer();
+  saveSession();
+}
+
+function advanceLinked(){
+  const flow=getActiveFlow();
+  if (runner.stepIndex >= flow.steps.length-1){
+    runner.flowsDone++;
+    beep(1200,60);
+    const perSide=parseInt(ui.linkedFlows.value,10);
+    const totalTarget=perSide*2;
+    const currentInBlock = runner.flowsDone % totalTarget;
+    if (ui.sideMode.value === "flow"){
+      if (currentInBlock === perSide){
+        runner.side = runner.side==="L"?"R":"L";
+        beep(880,120);
+      }
+    }
+    runner.stepIndex=0;
+  } else runner.stepIndex++;
+  saveSession();
+  renderRunner();
+  scrollToActiveStep();
+}
+function advanceTimed(){
+  const flow=getActiveFlow();
+  if (runner.stepIndex >= flow.steps.length-1){
+    runner.flowsDone++;
+    beep(1200,70);
+    runner.stepIndex=0;
+    const n=parseInt(ui.microBreakN.value,10);
+    if (n>0 && runner.flowsDone % n === 0) beep(660,150);
+  } else runner.stepIndex++;
+  saveSession();
+  renderRunner();
+  scrollToActiveStep();
+}
+
+/* ===========================
+   UI bindings
+=========================== */
+const ui = {
+  pillLine: document.getElementById("pillLine"),
+  flowTitle: document.getElementById("flowTitle"),
+  flowList: document.getElementById("flowList"),
+  modePieces: document.getElementById("modePieces"),
+  modeLinked: document.getElementById("modeLinked"),
+  modeTimed: document.getElementById("modeTimed"),
+  piecesReps: document.getElementById("piecesReps"),
+  piecesBothSides: document.getElementById("piecesBothSides"),
+  linkedFlows: document.getElementById("linkedFlows"),
+  timedMinutes: document.getElementById("timedMinutes"),
+  microBreakN: document.getElementById("microBreakN"),
+  runnerTitle: document.getElementById("runnerTitle"),
+  badgeSeg: document.getElementById("badgeSeg"),
+  badgeSide: document.getElementById("badgeSide"),
+  badgeStep: document.getElementById("badgeStep"),
+  calloutBox: document.getElementById("calloutBox"),
+  bigTimer: document.getElementById("bigTimer"),
+  progressWrap: document.getElementById("progressWrap"),
+  progressBar: document.getElementById("progressBar"),
+  stats: document.getElementById("stats"),
+  statFlows: document.getElementById("statFlows"),
+  statReps: document.getElementById("statReps"),
+  btnNew: document.getElementById("btnNew"),
+  btnRegen: document.getElementById("btnRegen"),
+  btnResume: document.getElementById("btnResume"),
+  btnStart: document.getElementById("btnStart"),
+  btnPause: document.getElementById("btnPause"),
+  btnReset: document.getElementById("btnReset"),
+  btnPrev: document.getElementById("btnPrev"),
+  btnNext: document.getElementById("btnNext"),
+  btnRep: document.getElementById("btnRep"),
+  sideMode: document.getElementById("sideMode"),
+  soundOn: document.getElementById("soundOn"),
+  wakeOn: document.getElementById("wakeOn"),
+  hbOn: document.getElementById("hbOn"),
+  historyBox: document.getElementById("historyBox"),
+  btnClear: document.getElementById("btnClear"),
+  currentTab:"pieces"
+};
+
+let currentFlow = null;
+
+function renderPills(flow){
+  ui.pillLine.innerHTML = "";
+  if (!flow) return;
+  ui.pillLine.innerHTML =
+    `<span><b>${flow.date}</b></span>
+     <span>•</span>
+     <span>Base: <b>${BASE_LABEL[flow.base]}</b></span>
+     <span>•</span>
+     <span>Intent: <b>${INTENT_LABEL[flow.intent]}</b></span>
+     <span>•</span>
+     <span>Feature: <b>${MOVES[flow.feature]?.name || flow.feature}</b></span>
+     <span>•</span>
+     <span>Start: <b>${flow.startSide}</b></span>`;
+}
+
+function renderFlowList(flow){
+  ui.flowList.innerHTML="";
+  if (!flow){ ui.flowTitle.textContent="—"; return; }
+  ui.flowTitle.textContent = `${BASE_LABEL[flow.base]} → ${MOVES[flow.feature]?.name || flow.feature}`;
+  const active = getActiveFlow() || flow;
+
+  active.steps.forEach((s,i)=>{
+    const m = MOVES[s.moveId];
+    const el=document.createElement("div");
+    el.className="step";
+    el.dataset.index=String(i);
+    if (i===runner.stepIndex){
+      el.style.borderColor="rgba(123,220,255,.28)";
+      el.style.background="rgba(123,220,255,.06)";
+    }
+    const tags = [`<span class="tag">${m.type}</span>`];
+    if (m.type !== "SET" && (m.tags||[]).length) tags.push(`<span class="tag">${m.tags[0]}</span>`);
+    el.innerHTML = `
+      <div class="idx">${i+1}</div>
+      <div style="flex:1">
+        <div class="main">${makeCallOut(s.moveId, s.side || active.startSide)}</div>
+        <div class="miniTags">${tags.join("")}</div>
+      </div>`;
+    el.addEventListener("click", ()=>{
+      runner.stepIndex=i;
+      saveSession();
+      renderRunner();
+      renderFlowList(currentFlow);
+      scrollToActiveStep(true);
+    });
+    ui.flowList.appendChild(el);
+  });
+}
+
+function scrollToActiveStep(center=false){
+  const el = ui.flowList.querySelector(`.step[data-index="${runner.stepIndex}"]`);
+  if (el) el.scrollIntoView({behavior:"smooth", block:center?"center":"nearest"});
+}
+
+function renderHistory(){
+  const h = getHistory().slice(0,7);
+  if (!h.length){ ui.historyBox.textContent="No history yet."; return; }
+  ui.historyBox.innerHTML = h.map(x=>`
+    <div style="margin-bottom:8px">
+      <span class="tag">${x.date}</span>
+      <span class="tag">${BASE_LABEL[x.base]}</span>
+      <span class="tag">${INTENT_LABEL[x.intent]}</span>
+      <span class="tag">${MOVES[x.feature]?.name || x.feature}</span>
+    </div>`).join("");
+}
+
+function renderRunner(){
+  if (!currentFlow){
+    ui.calloutBox.textContent="Generate a flow to begin.";
+    ui.badgeSide.textContent="—";
+    ui.badgeStep.textContent="—";
+    ui.bigTimer.textContent="00:00";
+    ui.progressBar.style.width="0%";
+    ui.statFlows.textContent="0";
+    ui.statReps.textContent="0";
+    ui.stats.style.display="none";
+    return;
+  }
+
+  ui.badgeSeg.textContent = `SEG ${runner.segment}`;
+  ui.badgeSide.textContent = runner.side;
+  ui.badgeStep.textContent = `STEP ${runner.stepIndex+1}`;
+
+  const flow = getActiveFlow();
+  const step = flow.steps[runner.stepIndex];
+  const call = makeCallOut(step.moveId, step.side || runner.side);
+
+  let guidance="";
+  if (runner.mode==="pieces"){
+    const reps=parseInt(ui.piecesReps.value,10);
+    guidance = ui.piecesBothSides.checked
+      ? `Do ${reps} reps on ${runner.side}, then mirror and do ${reps} reps on ${runner.side==="L"?"R":"L"}.`
+      : `Do ${reps} reps on ${runner.side}.`;
+  } else if (runner.mode==="linked"){
+    const perSide=parseInt(ui.linkedFlows.value,10);
+    guidance=`Run full flow for ${perSide} flows per side.`;
+  } else {
+    const n=parseInt(ui.microBreakN.value,10);
+    guidance = n>0 ? `Keep quality. Micro-break suggestion every ${n} flows.` : "Keep quality. No micro-breaks.";
+  }
+
+  ui.calloutBox.textContent = `${call}\n\n${guidance}`;
+  ui.stats.style.display="";
+  ui.statFlows.textContent = String(runner.flowsDone);
+  ui.statReps.textContent = String(runner.reps);
+
+  if (runner.mode==="timed"){
+    ui.bigTimer.style.display="";
+    ui.progressWrap.style.display="";
+    ui.bigTimer.textContent = formatTime(runner.timerLeft);
+    const pct = runner.timerTotal ? (100*(1 - runner.timerLeft/runner.timerTotal)) : 0;
+    ui.progressBar.style.width = `${clamp(pct,0,100)}%`;
+  } else {
+    ui.bigTimer.style.display="none";
+    ui.progressWrap.style.display="none";
+  }
+
+  renderFlowList(currentFlow);
+}
+
+function setMode(tab){
+  ui.currentTab = tab;
+  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active", t.dataset.tab===tab));
+  ui.modePieces.style.display = tab==="pieces" ? "" : "none";
+  ui.modeLinked.style.display = tab==="linked" ? "" : "none";
+  ui.modeTimed.style.display  = tab==="timed"  ? "" : "none";
+  runner.mode = tab;
+  runner.segment = tab==="pieces"?1:tab==="linked"?2:3;
+  ui.runnerTitle.textContent = tab==="pieces" ? "Pieces" : tab==="linked" ? "Linked" : "Timed";
+  resetRunner(false);
+  renderRunner();
+  saveSession();
+}
+
+function pushHistoryIfMissing(flow){
+  const h=getHistory();
+  if (h[0]?.date === flow.date) return;
+  pushHistory({date:flow.date, base:flow.base, feature:flow.feature, intent:flow.intent, style:flow.style});
+}
+
+function generateToday({override=false}={}){
+  const date=todayISO();
+  const stored=getTodayFlow();
+  if (stored && stored.date===date && !override){
+    currentFlow=stored;
+    pushHistoryIfMissing(currentFlow);
+    resetRunner(false);
+    renderPills(currentFlow);
+    renderFlowList(currentFlow);
+    renderRunner();
+    renderHistory();
+    saveSession();
+    return;
+  }
+
+  const hbEnabled = ui.hbOn.checked;
+  const seedKey = override ? `${date}#${Date.now()}` : date;
+  const rng = mulberry32(hashStrToSeed(seedKey));
+  const anchors = pickDailyAnchors(rng, hbEnabled);
+  const flow = composeFlow2({...anchors, seedKey, hbEnabled});
+
+  currentFlow=flow;
+  setTodayFlow(flow);
+  pushHistoryIfMissing(flow);
+
+  resetRunner(false);
+  renderPills(flow);
+  renderFlowList(flow);
+  renderRunner();
+  renderHistory();
+  saveSession();
+  beep(1040,90);
+}
+
+/* ===========================
+   Events
+=========================== */
+ui.btnNew.addEventListener("click", async ()=>{ await acquireWakeLock(); generateToday({override:false}); });
+ui.btnRegen.addEventListener("click", async ()=>{ await acquireWakeLock(); generateToday({override:true}); });
+ui.btnResume.addEventListener("click", async ()=>{
+  await acquireWakeLock();
+  const pack=loadSession();
+  if (!pack || !pack.flow){ alert("No saved session found."); return; }
+  currentFlow=pack.flow;
+
+  Object.assign(runner, pack.runner || {});
+  if (pack.ui){
+    ui.piecesReps.value = pack.ui.piecesReps ?? ui.piecesReps.value;
+    ui.piecesBothSides.checked = pack.ui.piecesBothSides ?? ui.piecesBothSides.checked;
+    ui.linkedFlows.value = pack.ui.linkedFlows ?? ui.linkedFlows.value;
+    ui.timedMinutes.value = pack.ui.timedMinutes ?? ui.timedMinutes.value;
+    ui.microBreakN.value = pack.ui.microBreakN ?? ui.microBreakN.value;
+    ui.sideMode.value = pack.ui.sideMode ?? ui.sideMode.value;
+    setMode(pack.ui.tab || "pieces");
+  }
+  resetRunner(false);
+  renderPills(currentFlow);
+  renderFlowList(currentFlow);
+  renderRunner();
+  renderHistory();
+});
+
+document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click", ()=>setMode(t.dataset.tab)));
+
+ui.btnStart.addEventListener("click", async ()=>{
+  await acquireWakeLock();
+  beep(880,40);
+  startRunner();
+  renderRunner();
+});
+ui.btnPause.addEventListener("click", ()=>{ pauseRunner(); renderRunner(); });
+ui.btnReset.addEventListener("click", ()=>{ resetRunner(true); renderRunner(); });
+
+ui.btnPrev.addEventListener("click", ()=>{
+  if (!currentFlow) return;
+  const flow = getActiveFlow();
+  runner.stepIndex = clamp(runner.stepIndex-1,0,flow.steps.length-1);
+  beep(740,50);
+  saveSession(); renderRunner(); scrollToActiveStep();
+});
+ui.btnNext.addEventListener("click", ()=>{
+  if (!currentFlow) return;
+  if (runner.mode==="linked") advanceLinked();
+  else if (runner.mode==="timed") advanceTimed();
+  else {
+    const flow = getActiveFlow();
+    runner.stepIndex = clamp(runner.stepIndex+1,0,flow.steps.length-1);
+    beep(1000,50);
+    saveSession(); renderRunner(); scrollToActiveStep();
+  }
+});
+ui.btnRep.addEventListener("click", ()=>{
+  if (!currentFlow) return;
+  runner.reps++;
+  beep(520,40);
+  saveSession(); renderRunner();
+});
+
+ui.soundOn.addEventListener("change", ()=>{ const s=getSettings(); s.soundOn=ui.soundOn.checked; setSettings(s); });
+ui.wakeOn.addEventListener("change", async ()=>{
+  const s=getSettings(); s.wakeOn=ui.wakeOn.checked; setSettings(s);
+  if (ui.wakeOn.checked) await acquireWakeLock(); else await releaseWakeLock();
+});
+ui.hbOn.addEventListener("change", ()=>{
+  const s=getSettings(); s.hbOn=ui.hbOn.checked; setSettings(s);
+  generateToday({override:true});
+});
+ui.sideMode.addEventListener("change", ()=>{
+  const s=getSettings(); s.sideMode=ui.sideMode.value; setSettings(s);
+  generateToday({override:true});
+});
+
+ui.timedMinutes.addEventListener("change", ()=>{ resetRunner(false); renderRunner(); });
+ui.microBreakN.addEventListener("change", ()=>{ runner.microBreakN=parseInt(ui.microBreakN.value,10); saveSession(); });
+
+ui.btnClear.addEventListener("click", ()=>{
+  if (!confirm("Clear history + saved session + today's flow?")) return;
+  localStorage.removeItem(LS.HISTORY);
+  localStorage.removeItem(LS.SESSION);
+  localStorage.removeItem(LS.TODAY);
+  currentFlow=null;
+  resetRunner(false);
+  renderPills(null); renderFlowList(null); renderRunner(); renderHistory();
+});
+
+/* ===========================
+   Boot
+=========================== */
+(function boot(){
+  const s=getSettings();
+  if (typeof s.soundOn==="boolean") ui.soundOn.checked=s.soundOn;
+  if (typeof s.wakeOn==="boolean") ui.wakeOn.checked=s.wakeOn;
+  if (typeof s.hbOn==="boolean") ui.hbOn.checked=s.hbOn;
+  if (typeof s.sideMode==="string") ui.sideMode.value=s.sideMode;
+
+  const tf=getTodayFlow();
+  if (tf && tf.date===todayISO()) currentFlow=tf;
+
+  const pack=loadSession();
+  if (pack?.flow && pack.flow.date===todayISO()){
+    currentFlow=pack.flow;
+    Object.assign(runner, pack.runner || {});
+    if (pack.ui?.tab) ui.currentTab=pack.ui.tab;
+    if (pack.ui){
+      ui.piecesReps.value = pack.ui.piecesReps ?? ui.piecesReps.value;
+      ui.piecesBothSides.checked = pack.ui.piecesBothSides ?? ui.piecesBothSides.checked;
+      ui.linkedFlows.value = pack.ui.linkedFlows ?? ui.linkedFlows.value;
+      ui.timedMinutes.value = pack.ui.timedMinutes ?? ui.timedMinutes.value;
+      ui.microBreakN.value = pack.ui.microBreakN ?? ui.microBreakN.value;
+      ui.sideMode.value = pack.ui.sideMode ?? ui.sideMode.value;
+    }
+  }
+
+  setMode(ui.currentTab);
+  renderHistory();
+
+  if (currentFlow){
+    resetRunner(false);
+    renderPills(currentFlow);
+    renderFlowList(currentFlow);
+    renderRunner();
+    pushHistoryIfMissing(currentFlow);
+  } else {
+    renderRunner();
+  }
+
+  acquireWakeLock();
+  setInterval(saveSession, 2500);
+})();
+</script>
+</body>
+</html>
