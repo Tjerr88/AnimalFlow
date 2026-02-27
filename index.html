@@ -755,24 +755,78 @@ function wantsTravel(plan){
   return (plan.intent === "TRAVEL") || (plan.style === "ATHLETIC");
 }
 
+
+function pickTemplateId(rng, style){
+  // Variety comes from different sentence-shapes (hidden).
+  // We also avoid repeating yesterday's template for more noticeable change.
+  const templatesByStyle = {
+    CREATIVE:  ["C1","C2","C3","C4"],
+    ATHLETIC:  ["A1","A2","A3"],
+    TECHNICAL: ["T1","T2","T3"],
+    GROUNDED:  ["G1","G2","G3"],
+  };
+  const pool = templatesByStyle[style] || ["C1","C2","C3"];
+  const h=getHistory();
+  const y=h[0] || null;
+  const avoid = y?.templateId || null;
+  const pick = choiceExcluding(rng, pool, avoid);
+  return pick;
+}
+
+const TEMPLATES = {
+  // Each template is a sequence of phases (length = total steps).
+  // Feature is where phase === "FEATURE". Resolve is last.
+  // We keep one Feature total, but its position changes by template.
+  C1: ["SET","ENTRY","DEVELOP","REDIRECT","DEVELOP","REDIRECT","FEATURE","RESOLVE"],
+  C2: ["SET","ENTRY","DEVELOP","DEVELOP","REDIRECT","DEVELOP","FEATURE","RESOLVE"],
+  C3: ["SET","ENTRY","DEVELOP","REDIRECT","REDIRECT","DEVELOP","FEATURE","RESOLVE"],
+  C4: ["SET","ENTRY","DEVELOP","DEVELOP","REDIRECT","REDIRECT","DEVELOP","FEATURE","RESOLVE"],
+
+  A1: ["SET","ENTRY","DEVELOP","TRAVEL","REDIRECT","DEVELOP","FEATURE","RESOLVE"],
+  A2: ["SET","ENTRY","TRAVEL","DEVELOP","REDIRECT","TRAVEL","FEATURE","RESOLVE"],
+  A3: ["SET","ENTRY","DEVELOP","TRAVEL","DEVELOP","REDIRECT","FEATURE","RESOLVE"],
+
+  T1: ["SET","ENTRY","DEVELOP","DEVELOP","SWITCH","DEVELOP","FEATURE","RESOLVE"],
+  T2: ["SET","ENTRY","DEVELOP","SWITCH","DEVELOP","SWITCH","FEATURE","RESOLVE"],
+  T3: ["SET","ENTRY","DEVELOP","DEVELOP","SWITCH","SWITCH","FEATURE","RESOLVE"],
+
+  G1: ["SET","ENTRY","DEVELOP","LOW","DEVELOP","LOW","FEATURE","RESOLVE"],
+  G2: ["SET","ENTRY","LOW","DEVELOP","LOW","DEVELOP","FEATURE","RESOLVE"],
+  G3: ["SET","ENTRY","DEVELOP","LOW","DEVELOP","REDIRECT","FEATURE","RESOLVE"],
+};
+
+function phaseAtFromTemplate(template, i){
+  return template[i] || (i===template.length-1 ? "RESOLVE" : "DEVELOP");
+}
+
 function composeFlow2({base, feature, intent, style, seedKey, hbEnabled}){
   const rng = mulberry32(hashStrToSeed(seedKey));
   const startSide = rng() < 0.5 ? "L" : "R";
   const pickSide = makeSidePicker(rng, startSide);
 
-  // Plan: 7–9 steps total
-  const targetLen = 7 + Math.floor(rng()*3); // 7..9
-  const featureIndex = clamp(targetLen - 2, 5, targetLen - 2); // place feature near the end
+  // Pick a hidden "sentence template" to avoid the feeling of identical order each day.
+  const templateId = pickTemplateId(rng, style);
+  let template = TEMPLATES[templateId] || TEMPLATES.C1;
 
-  // phases per index
-  function phaseAt(i){
-    if (i === 0) return "SET";
-    if (i === featureIndex) return "FEATURE";
-    if (i === targetLen - 1) return "RESOLVE";
-    if (i === 1) return "ENTRY";
-    if (i <= 3) return "DEVELOP";
-    return "REDIRECT";
+  // Small length jitter without breaking the template logic:
+  // - 20%: add an extra DEVELOP before FEATURE (creative-ish)
+  // - 15%: add an extra TRAVEL on athletic/travel intent
+  template = template.slice(); // copy
+  if (rng() < 0.20 && template.length < 10){
+    const fi = template.indexOf("FEATURE");
+    if (fi > 0){
+      template.splice(fi, 0, "DEVELOP");
+    }
   }
+  if ((intent==="TRAVEL" || style==="ATHLETIC") && rng() < 0.15 && template.length < 10){
+    const fi = template.indexOf("FEATURE");
+    if (fi > 2){
+      template.splice(fi-1, 0, "TRAVEL");
+    }
+  }
+
+  const targetLen = template.length;
+  const featureIndex = template.indexOf("FEATURE");
 
   const plan = {base, feature, intent, style, targetLen, featureIndex, phase:"SET"};
 
@@ -790,7 +844,7 @@ function composeFlow2({base, feature, intent, style, seedKey, hbEnabled}){
   const BEAM_W = 10;
 
   for (let i=1; i<targetLen; i++){
-    plan.phase = phaseAt(i);
+    plan.phase = phaseAtFromTemplate(template, i);
     const nextBeam = [];
 
     for (const node of beam){
@@ -801,14 +855,29 @@ function composeFlow2({base, feature, intent, style, seedKey, hbEnabled}){
       if (plan.phase === "FEATURE"){
         candidates = [feature].filter(id => canUseMove(st, id, hbEnabled));
         if (!candidates.length){
-          // if feature not legal, insert a Set to its required base, then feature (handled by beam naturally):
           const feat = MOVES[feature];
           const targetBase = (feat?.from && feat.from[0]) ? feat.from[0] : st.base;
           candidates = [setIdForBase(targetBase)].filter(id => canUseMove(st, id, hbEnabled));
         }
       } else {
-        candidates = enumerateMoves(st, hbEnabled, plan)
-          .filter(id => id !== feature); // prevent early feature
+        // Phase shaping:
+        // - TRAVEL phase: strongly prefer TF moves (BEAR) if legal
+        // - LOW phase: prefer LOW-tagged moves
+        // - SWITCH phase: prefer SWITCH group moves
+        const pool = enumerateMoves(st, hbEnabled, plan).filter(id => id !== feature);
+
+        if (plan.phase === "TRAVEL"){
+          candidates = pool.filter(id => MOVES[id]?.type === "TF");
+          if (!candidates.length) candidates = pool; // fallback
+        } else if (plan.phase === "LOW"){
+          candidates = pool.filter(id => (MOVES[id]?.tags||[]).includes("LOW"));
+          if (!candidates.length) candidates = pool;
+        } else if (plan.phase === "SWITCH"){
+          candidates = pool.filter(id => getGroup(id) === "SWITCH");
+          if (!candidates.length) candidates = pool;
+        } else {
+          candidates = pool;
+        }
       }
 
       for (const moveId of candidates){
@@ -822,10 +891,8 @@ function composeFlow2({base, feature, intent, style, seedKey, hbEnabled}){
         const g = getGroup(moveId);
         if (m.type === "ST" && st.lastGroup === g && g !== "SWITCH" && st.lastSide === side) continue;
 
-        // score
         const sc = scoreCandidate(st, moveId, side, plan);
 
-        // clone
         const st2 = deepCopyState(st);
         st2.lastEnergy = sc.energy || st2.lastEnergy;
         applyMove(st2, moveId, side);
@@ -836,11 +903,9 @@ function composeFlow2({base, feature, intent, style, seedKey, hbEnabled}){
       }
     }
 
-    // keep best N
     nextBeam.sort((a,b)=> b.total - a.total);
     beam = nextBeam.slice(0, BEAM_W);
 
-    // fail-safe: if beam collapses (shouldn't), fall back to simple set
     if (!beam.length){
       const fallback = deepCopyState(startState);
       const steps = deepCopy(startSteps);
@@ -851,8 +916,6 @@ function composeFlow2({base, feature, intent, style, seedKey, hbEnabled}){
   }
 
   // choose best with end constraints:
-  // - try to end at home base
-  // - try to include travel if desired
   let best = null;
   for (const node of beam){
     let bonus = 0;
@@ -860,15 +923,16 @@ function composeFlow2({base, feature, intent, style, seedKey, hbEnabled}){
     if (wantsTravel(plan) && node.state.hasTravel) bonus += 2;
     if (node.state.energyCounts.BREAK === 1) bonus += 1;
     if (node.state.energyCounts.BREAK > 1) bonus -= 4;
+    // small reward for matching intended template phases (travel present when template asked for travel)
+    if (template.includes("TRAVEL") && node.state.hasTravel) bonus += 1;
     const total = node.total + bonus;
     if (!best || total > best.total) best = {steps:node.steps, total, state:node.state};
   }
 
-  // If we don't end at home, append a resolve step:
   const steps = best.steps.slice();
   const finalState = best.state;
+
   if (finalState.base !== base){
-    // try a movement-based return first (ST candidates that can land us home)
     const returnPool = enumerateMoves(finalState, hbEnabled, { ...plan, phase:"RESOLVE" })
       .filter(id => MOVES[id]?.type === "ST");
     let added = false;
@@ -883,12 +947,10 @@ function composeFlow2({base, feature, intent, style, seedKey, hbEnabled}){
         break;
       }
     }
-    if (!added){
-      steps.push({moveId:setIdForBase(base), side:null});
-    }
+    if (!added) steps.push({moveId:setIdForBase(base), side:null});
   }
 
-  // Add/trim to 6–10
+  // Keep within 6–10 steps
   while (steps.length < 6){
     steps.splice(steps.length-1, 0, {moveId:"UST", side: startSide});
   }
@@ -900,13 +962,15 @@ function composeFlow2({base, feature, intent, style, seedKey, hbEnabled}){
     base,
     feature,
     intent,
-    style, // stored in history but not shown in UI
+    style,
+    templateId,
     startSide,
     steps,
   };
 }
 
 // Deep copy for state with Sets preserved
+
 function deepCopyState(st){
   const c = {
     homeBase: st.homeBase,
@@ -1241,7 +1305,7 @@ function setMode(tab){
 function pushHistoryIfMissing(flow){
   const h=getHistory();
   if (h[0]?.date === flow.date) return;
-  pushHistory({date:flow.date, base:flow.base, feature:flow.feature, intent:flow.intent, style:flow.style});
+  pushHistory({date:flow.date, base:flow.base, feature:flow.feature, intent:flow.intent, style:flow.style, templateId: flow.templateId});
 }
 
 function generateToday({override=false}={}){
