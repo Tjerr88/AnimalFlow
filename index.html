@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#0b0f14" />
-  <title>Animal Flow Daily Generator</title>
+  <title>Animal Flow Pure</title>
   <style>
     :root{
       --bg:#0b0f14;
@@ -118,13 +118,69 @@
     details[open] summary{border-bottom:1px solid var(--border); color:var(--text)}
     .detailsBody{padding:10px 12px}
     .hint{color:var(--muted);font-size:12px;line-height:1.35}
-  </style>
+  
+
+    /* ===== Manual blocks (Warm-up / Drill / Cool-down) ===== */
+    .block{
+      border:1px solid var(--border);
+      border-radius:14px;
+      background:rgba(255,255,255,.03);
+      padding:12px;
+      margin:12px 0;
+    }
+    details.block{ padding:0; overflow:hidden; }
+    details.block summary{
+      list-style:none;
+      cursor:pointer;
+      padding:12px;
+      user-select:none;
+      background:rgba(255,255,255,.02);
+    }
+    details.block summary::-webkit-details-marker{ display:none; }
+    .sumrow{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .badge{
+      font-size:12px;
+      color:var(--text);
+      border:1px solid var(--border);
+      padding:6px 10px;
+      border-radius:999px;
+      background:rgba(255,255,255,.02);
+      white-space:nowrap;
+    }
+    .bhd{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-bottom:8px; }
+    .bbody{ padding:12px; }
+    .sectionTitle{ margin:10px 0 6px; color:var(--text); font-weight:650; font-size:13px; letter-spacing:.2px; }
+    .checklist{ margin:0; padding:0; list-style:none; display:grid; gap:8px; }
+    .checklist li{ display:flex; gap:10px; align-items:flex-start; color:var(--text); line-height:1.25; }
+    .dot{
+      width:10px; height:10px; border-radius:50%;
+      margin-top:4px;
+      background:rgba(123,220,255,.75);
+      box-shadow:0 0 0 3px rgba(123,220,255,.12);
+      flex:0 0 auto;
+    }
+    .note{
+      margin-top:10px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.3;
+    }
+    .grid2{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:12px;
+    }
+    @media(min-width:860px){
+      .grid2{ grid-template-columns:1fr 1fr; }
+    }
+
+</style>
 </head>
 <body>
 <div class="wrap">
   <header>
     <div>
-      <h1>Animal Flow Daily Generator</h1>
+      <h1>Animal Flow Pure</h1>
       <div class="sub">Daily flow built with L1 + L2 flow language logic (Set bases, movement window checks, energy intent, one feature movement). 5–5–10 runner included.</div>
       <div class="pillline" id="pillLine"></div>
     </div>
@@ -149,6 +205,87 @@
         </div>
       </div>
       <div class="bd">
+      <div id="hbPractice" class="block" style="display:none">
+        <div class="bhd">
+          <div class="k">Hand Balance Practice (optional)</div>
+          <div class="hint">Per L2: prefer hand balancing as a fresh, separate block (or do it first).</div>
+        </div>
+        <div class="bbody">
+          <ul class="checklist">
+            <li><span class="dot"></span> 3–5 sets: Tuck Balance attempts (quality holds, stop before shaking)</li>
+            <li><span class="dot"></span> OR 3–5 sets: Crow / Frog stand 10–20s</li>
+            <li><span class="dot"></span> OR Toe-tap / box-assisted balance progressions</li>
+            <li><span class="dot"></span> Rest 45–90s between attempts</li>
+          </ul>
+          <div class="note">Tip: keep this block <b>out</b> of Segment 3 (timed) to avoid fatigue-based breakdown.</div>
+        </div>
+      </div>
+
+      <details id="warmupBlock" class="block" open>
+        <summary>
+          <div class="sumrow">
+            <div>
+              <div class="k">Warm-up (L1/L2)</div>
+              <div class="hint">Prep → Activate → FSS → Traveling → Switches/Transitions</div>
+            </div>
+            <div class="badge">5–8 min</div>
+          </div>
+        </summary>
+        <div class="bbody">
+          <div class="grid2">
+            <div>
+              <div class="sectionTitle">A) Wrist Prep</div>
+              <ul class="checklist">
+                <li><span class="dot"></span> Wrist rocks (forward/back)</li>
+                <li><span class="dot"></span> Side-to-side + circles</li>
+                <li><span class="dot"></span> Light pulses (pain-free range)</li>
+              </ul>
+
+              <div class="sectionTitle">B) Activations</div>
+              <ul class="checklist">
+                <li><span class="dot"></span> Beast hold 20–30s</li>
+                <li><span class="dot"></span> Crab hold 20–30s</li>
+              </ul>
+            </div>
+
+            <div>
+              <div class="sectionTitle">C) FSS mini-flow</div>
+              <ul class="checklist">
+                <li><span class="dot"></span> Beast → Crab → Beast (2x)</li>
+              </ul>
+
+              <div class="sectionTitle">D) Traveling Forms</div>
+              <ul class="checklist">
+                <li><span class="dot"></span> Ape forward/back (1–2 reps per side)</li>
+                <li><span class="dot"></span> Beast lateral (1–2 reps per side)</li>
+                <li><span class="dot"></span> Crab reach step (1–2 reps per side)</li>
+              </ul>
+
+              <div class="sectionTitle">E) Switches &amp; Transitions primer</div>
+              <ul class="checklist">
+                <li><span class="dot"></span> 1 Underswitch (each side)</li>
+                <li><span class="dot"></span> 1 Side Kickthrough (each side)</li>
+                <li><span class="dot"></span> 1 Scorpion (each side)</li>
+                <li><span class="dot"></span> 1 Front Kickthrough (each side)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </details>
+
+      <div id="drillCard" class="block">
+        <div class="bhd">
+          <div class="k">Daily Drill Card</div>
+          <div class="hint">Keep L1 basics alive: 1–2 clean reps each (tech focus).</div>
+        </div>
+        <div class="bbody">
+          <ul id="drillList" class="checklist"></ul>
+          <div class="note">Rule: no grind. Treat these as “skill reps” before Segment 1.</div>
+        </div>
+      </div>
+
+      <div class="hr"></div>
+
         <div class="flowlist" id="flowList"></div>
 
         <div class="hr"></div>
@@ -204,7 +341,28 @@
           </div>
           <div class="hint">Segment 3: “constant but various motion”. Micro-breaks act as quality resets.</div>
         </div>
-      </div>
+      
+        <div class="hr"></div>
+
+        <details id="cooldownBlock" class="block">
+          <summary>
+            <div class="sumrow">
+              <div>
+                <div class="k">Cool-down</div>
+                <div class="hint">Reset wrists + easy breathing (1–3 min)</div>
+              </div>
+              <div class="badge">1–3 min</div>
+            </div>
+          </summary>
+          <div class="bbody">
+            <ul class="checklist">
+              <li><span class="dot"></span> Wrist mobs (gentle) 30–60s</li>
+              <li><span class="dot"></span> Child’s pose breathing 5 slow breaths</li>
+              <li><span class="dot"></span> Optional: supine breathing 5 slow breaths</li>
+            </ul>
+          </div>
+        </details>
+</div>
     </section>
 
     <aside class="card">
@@ -332,6 +490,15 @@ function todayISO(){
 }
 function clamp(n,min,max){ return Math.max(min, Math.min(max,n)); }
 function deepCopy(x){ return JSON.parse(JSON.stringify(x)); }
+function escapeHTML(str){
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
+
 function choice(rng, arr){ return arr[Math.floor(rng()*arr.length)]; }
 function choiceExcluding(rng, arr, exclude){
   const pool = arr.filter(x => x !== exclude);
@@ -733,6 +900,27 @@ function makeCallOut(moveId, side="L"){
   return `${dir} ${limb} ${m.name}`;
 }
 
+
+/* ===========================
+   PURE helpers (Animal Flow Pure)
+=========================== */
+function formatPureName(rawName, sideType, side){
+  if (!sideType) return rawName;
+  if (sideType === "LEG") return `${side} leg ${rawName}`;
+  if (sideType === "ARM") return `${side} arm ${rawName}`;
+  return rawName;
+}
+
+function safeStepLabel(step, fallbackSide="L"){
+  // For legacy/scored flows: step.moveId exists.
+  if (step && step.moveId){
+    return makeCallOut(step.moveId, step.side || fallbackSide);
+  }
+  // For PURE flows: step.name is already pre-formatted.
+  if (step && step.name) return step.name;
+  // Last resort
+  return "—";
+}
 /* ===========================
    Composer 2.0: Beam search
 =========================== */
@@ -799,207 +987,145 @@ function phaseAtFromTemplate(template, i){
   return template[i] || (i===template.length-1 ? "RESOLVE" : "DEVELOP");
 }
 
-function composeFlow2({base, feature, intent, style, seedKey, hbEnabled}){
+
+/* ===========================
+   Animal Flow PURE (L1 + L2)
+   - Strict vocabulary (manual keys)
+   - Strict base-position transition charts
+   - No hybrids, no scoring, no templates
+=========================== */
+
+const SHAPE = { BEAST:"BEAST", CRAB:"CRAB", APE:"APE", LOADED_BEAST:"LOADED_BEAST" };
+
+/**
+ * Move definition
+ * - id: stable key
+ * - name: display name (Call Out command)
+ * - start/end: base position state-machine nodes
+ * - side: "LEG" | "ARM" | null  (whether it needs L/R callout)
+ */
+const PURE_MOVES = [
+  // SET between base positions (manual language)
+  {id:"SET_LB", name:"Set Loaded Beast", start:SHAPE.BEAST, end:SHAPE.LOADED_BEAST, side:null},
+  {id:"SET_BEAST_FROM_LB", name:"Set Beast", start:SHAPE.LOADED_BEAST, end:SHAPE.BEAST, side:null},
+  {id:"SET_APE_FROM_BEAST", name:"Set Ape", start:SHAPE.BEAST, end:SHAPE.APE, side:null},
+  {id:"SET_BEAST_FROM_APE", name:"Set Beast", start:SHAPE.APE, end:SHAPE.BEAST, side:null},
+  {id:"SET_APE_FROM_CRAB", name:"Set Ape", start:SHAPE.CRAB, end:SHAPE.APE, side:null},
+
+  // S&T (core L1/L2)
+  {id:"US_B2C", name:"Underswitch", start:SHAPE.BEAST, end:SHAPE.CRAB, side:"LEG"},
+  {id:"US_C2B", name:"Underswitch", start:SHAPE.CRAB, end:SHAPE.BEAST, side:"LEG"},
+  {id:"US_C2LB", name:"Underswitch to Loaded Beast", start:SHAPE.CRAB, end:SHAPE.LOADED_BEAST, side:"LEG"},
+  {id:"US_LB2C", name:"Underswitch", start:SHAPE.LOADED_BEAST, end:SHAPE.CRAB, side:"LEG"},
+
+  {id:"SKT_BEAST", name:"Side Kickthrough", start:SHAPE.BEAST, end:SHAPE.BEAST, side:"LEG"},
+  {id:"FS_CRAB", name:"Full Scorpion", start:SHAPE.CRAB, end:SHAPE.CRAB, side:"LEG"},
+  {id:"SS_BEAST", name:"Scorpion Switch", start:SHAPE.BEAST, end:SHAPE.BEAST, side:"LEG"},
+
+  // Loaded Beast S&T (L1 base chart)
+  {id:"FST_LB", name:"Front Step Through", start:SHAPE.LOADED_BEAST, end:SHAPE.LOADED_BEAST, side:"LEG"},
+  {id:"FKT_LB", name:"Front Kickthrough", start:SHAPE.LOADED_BEAST, end:SHAPE.LOADED_BEAST, side:"LEG"},
+  {id:"FSTEP_LB", name:"Front Step", start:SHAPE.LOADED_BEAST, end:SHAPE.LOADED_BEAST, side:"LEG"},
+
+  // Traveling Forms (L1/L2 keys)
+  {id:"TF_BEAST_FWD", name:"Forward Traveling Beast", start:SHAPE.BEAST, end:SHAPE.BEAST, side:null},
+  {id:"TF_BEAST_REV", name:"Reverse Traveling Beast", start:SHAPE.BEAST, end:SHAPE.BEAST, side:null},
+  {id:"TF_BEAST_LAT", name:"Lateral Traveling Beast", start:SHAPE.BEAST, end:SHAPE.BEAST, side:null},
+
+  {id:"TF_CRAB_FWD", name:"Forward Traveling Crab", start:SHAPE.CRAB, end:SHAPE.CRAB, side:null},
+  {id:"TF_CRAB_REV", name:"Reverse Traveling Crab", start:SHAPE.CRAB, end:SHAPE.CRAB, side:null},
+
+  {id:"TF_APE_FWD", name:"Forward Traveling Ape", start:SHAPE.APE, end:SHAPE.APE, side:null},
+  {id:"TF_APE_LAT1", name:"Lateral Traveling Ape (Low Hip)", start:SHAPE.APE, end:SHAPE.APE, side:null},
+  {id:"TF_APE_LAT2", name:"Lateral Traveling Ape (High Hip)", start:SHAPE.APE, end:SHAPE.APE, side:null},
+  {id:"TF_APE_LAT3", name:"Lateral Traveling Ape (Reaching)", start:SHAPE.APE, end:SHAPE.APE, side:null},
+];
+
+const PURE_BY_START = PURE_MOVES.reduce((acc,m)=>{
+  (acc[m.start] ||= []).push(m);
+  return acc;
+}, {});
+
+// Helper: avoid immediate repeats, and avoid set spam
+function pureCandidates(stateShape, lastId){
+  let c = (PURE_BY_START[stateShape] || []).slice();
+  if (lastId) c = c.filter(x=>x.id !== lastId);
+
+  // Keep "Set ..." transitions from dominating: if there are any non-SET options, prefer them.
+  const nonSet = c.filter(x=>!x.id.startsWith("SET_"));
+  if (nonSet.length) c = nonSet;
+
+  return c;
+}
+
+function formatPureMove(move, side){
+  if (move.side === "LEG"){
+    return `${side} leg ${move.name}`;
+  }
+  if (move.side === "ARM"){
+    return `${side} arm ${move.name}`;
+  }
+  return move.name;
+}
+
+function composePureFlow({seedKey, hbEnabled}){
   const rng = mulberry32(hashStrToSeed(seedKey));
   const startSide = rng() < 0.5 ? "L" : "R";
   const pickSide = makeSidePicker(rng, startSide);
 
-  // Pick a hidden "sentence template" to avoid the feeling of identical order each day.
-  const templateId = pickTemplateId(rng, style);
-  let template = TEMPLATES[templateId] || TEMPLATES.C1;
+  const len = 6 + Math.floor(rng()*3); // 6–8
+  let shape = SHAPE.BEAST; // start position for the written flow
 
-  // Small length jitter without breaking the template logic:
-  // - 20%: add an extra DEVELOP before FEATURE (creative-ish)
-  // - 15%: add an extra TRAVEL on athletic/travel intent
-  template = template.slice(); // copy
-  if (rng() < 0.20 && template.length < 10){
-    const fi = template.indexOf("FEATURE");
-    if (fi > 0){
-      template.splice(fi, 0, "DEVELOP");
-    }
-  }
-  if ((intent==="TRAVEL" || style==="ATHLETIC") && rng() < 0.15 && template.length < 10){
-    const fi = template.indexOf("FEATURE");
-    if (fi > 2){
-      template.splice(fi-1, 0, "TRAVEL");
-    }
-  }
+  const steps = [];
+  let lastId = null;
 
-  const targetLen = template.length;
-  const featureIndex = template.indexOf("FEATURE");
+  for (let i=0; i<len; i++){
+    const cands = pureCandidates(shape, lastId);
+    if (!cands.length) break;
 
-  const plan = {base, feature, intent, style, targetLen, featureIndex, phase:"SET"};
+    const move = cands[Math.floor(rng()*cands.length)];
+    const side = (move.side ? pickSide() : null);
 
-  // Beam node: {state, steps, totalScore}
-  const startState = makeState(base, startSide);
-  const startSteps = [];
-  // hard start with Set home base
-  const homeSet = setIdForBase(base);
-  startSteps.push({moveId:homeSet, side:null});
-  applyMove(startState, homeSet, null);
-  startState.lastEnergy = "LOW";
-  startState.baseCounts[base] = 1;
+    steps.push({
+      id: move.id,
+      name: formatPureMove(move, side || startSide),
+      raw: move.name,
+      start: move.start,
+      end: move.end,
+      side: side,
+      sideType: move.side
+    });
 
-  let beam = [{state:startState, steps:startSteps, total:0}];
-  const BEAM_W = 10;
-
-  for (let i=1; i<targetLen; i++){
-    plan.phase = phaseAtFromTemplate(template, i);
-    const nextBeam = [];
-
-    for (const node of beam){
-      const st = node.state;
-
-      // enforce “feature exactly once” at featureIndex
-      let candidates = [];
-      if (plan.phase === "FEATURE"){
-        candidates = [feature].filter(id => canUseMove(st, id, hbEnabled));
-        if (!candidates.length){
-          const feat = MOVES[feature];
-          const targetBase = (feat?.from && feat.from[0]) ? feat.from[0] : st.base;
-          candidates = [setIdForBase(targetBase)].filter(id => canUseMove(st, id, hbEnabled));
-        }
-      } else {
-        // Phase shaping:
-        // - TRAVEL phase: strongly prefer TF moves (BEAR) if legal
-        // - LOW phase: prefer LOW-tagged moves
-        // - SWITCH phase: prefer SWITCH group moves
-        const pool = enumerateMoves(st, hbEnabled, plan).filter(id => id !== feature);
-
-        if (plan.phase === "TRAVEL"){
-          candidates = pool.filter(id => MOVES[id]?.type === "TF");
-          if (!candidates.length) candidates = pool; // fallback
-        } else if (plan.phase === "LOW"){
-          candidates = pool.filter(id => (MOVES[id]?.tags||[]).includes("LOW"));
-          if (!candidates.length) candidates = pool;
-        } else if (plan.phase === "SWITCH"){
-          candidates = pool.filter(id => getGroup(id) === "SWITCH");
-          if (!candidates.length) candidates = pool;
-        } else {
-          candidates = pool;
-        }
-      }
-
-      for (const moveId of candidates){
-        const m = MOVES[moveId];
-        const side = m.sideable ? pickSide() : null;
-
-        // hard-ish constraint: avoid 3 same-side sideable moves in a row
-        if (m.sideable && side && st.lastSide === side && st.sideStreak >= 3) continue;
-
-        // hard-ish constraint: avoid same group + side repetition pattern on ST
-        const g = getGroup(moveId);
-        if (m.type === "ST" && st.lastGroup === g && g !== "SWITCH" && st.lastSide === side) continue;
-
-        const sc = scoreCandidate(st, moveId, side, plan);
-
-        const st2 = deepCopyState(st);
-        st2.lastEnergy = sc.energy || st2.lastEnergy;
-        applyMove(st2, moveId, side);
-        st2.lastEnergy = sc.energy || st2.lastEnergy;
-
-        const steps2 = node.steps.concat([{moveId, side}]);
-        nextBeam.push({state:st2, steps:steps2, total: node.total + sc.score});
-      }
-    }
-
-    nextBeam.sort((a,b)=> b.total - a.total);
-    beam = nextBeam.slice(0, BEAM_W);
-
-    if (!beam.length){
-      const fallback = deepCopyState(startState);
-      const steps = deepCopy(startSteps);
-      steps.push({moveId:homeSet, side:null});
-      applyMove(fallback, homeSet, null);
-      beam = [{state:fallback, steps, total:-10}];
-    }
+    shape = move.end;
+    lastId = move.id;
   }
 
-  // choose best with end constraints:
-  let best = null;
-  for (const node of beam){
-    let bonus = 0;
-    if (node.state.base === base) bonus += 3;
-    if (wantsTravel(plan) && node.state.hasTravel) bonus += 2;
-    if (node.state.energyCounts.BREAK === 1) bonus += 1;
-    if (node.state.energyCounts.BREAK > 1) bonus -= 4;
-    // small reward for matching intended template phases (travel present when template asked for travel)
-    if (template.includes("TRAVEL") && node.state.hasTravel) bonus += 1;
-    const total = node.total + bonus;
-    if (!best || total > best.total) best = {steps:node.steps, total, state:node.state};
-  }
-
-  const steps = best.steps.slice();
-  const finalState = best.state;
-
-  if (finalState.base !== base){
-    const returnPool = enumerateMoves(finalState, hbEnabled, { ...plan, phase:"RESOLVE" })
-      .filter(id => MOVES[id]?.type === "ST");
-    let added = false;
-    for (const id of returnPool){
-      const stTmp = deepCopyState(finalState);
-      const side = MOVES[id].sideable ? pickSide() : null;
-      if (!canUseMove(stTmp, id, hbEnabled)) continue;
-      applyMove(stTmp, id, side);
-      if (stTmp.base === base){
-        steps.push({moveId:id, side});
-        added = true;
-        break;
-      }
-    }
-    if (!added) steps.push({moveId:setIdForBase(base), side:null});
-  }
-
-  // Keep within 6–10 steps
-  while (steps.length < 6){
-    steps.splice(steps.length-1, 0, {moveId:"UST", side: startSide});
-  }
-  if (steps.length > 10) steps.splice(10);
-
-  return {
-    date: todayISO(),
-    seedKey,
-    base,
-    feature,
-    intent,
-    style,
-    templateId,
-    startSide,
-    steps,
-  };
+  return { seedKey, hbEnabled, startSide, steps };
 }
 
-// Deep copy for state with Sets preserved
-
-function deepCopyState(st){
-  const c = {
-    homeBase: st.homeBase,
-    base: st.base,
-    windowOpen: st.windowOpen,
-    lastMoveId: st.lastMoveId,
-    lastSide: st.lastSide,
-    sideStreak: st.sideStreak,
-    lastEnergy: st.lastEnergy,
-    lastGroup: st.lastGroup,
-    stepCount: st.stepCount,
-    stStreak: st.stStreak,
-    energyCounts: {...st.energyCounts},
-    baseCounts: {...st.baseCounts},
-    usedMove: new Set(Array.from(st.usedMove)),
-    usedPair: new Set(Array.from(st.usedPair)),
-    hasTravel: st.hasTravel,
-    usedFeature: st.usedFeature,
-  };
-  return c;
-}
 
 function mirrorFlow(flow){
   const mirrored = deepCopy(flow);
   mirrored.startSide = flow.startSide==="L"?"R":"L";
-  mirrored.steps = flow.steps.map(s=>{
-    const m = MOVES[s.moveId];
-    if (m?.sideable && s.side){
-      return {...s, side: (s.side==="L"?"R":"L")};
+  mirrored.steps = (flow.steps||[]).map(s=>{
+    // Scored/legacy flow steps
+    if (s.moveId){
+      const m = MOVES[s.moveId];
+      if (m?.sideable && s.side){
+        return {...s, side: (s.side==="L"?"R":"L")};
+      }
+      return {...s};
+    }
+    // PURE flow steps
+    if (s.side){
+      const ns = (s.side==="L"?"R":"L");
+      const sideType = s.sideType || null;
+      const raw = s.raw || s.rawName || s.rawMove || s.rawLabel || s.rawText || s.rawName || s.raw || s.rawTitle || s.raw;
+      const rawName = s.raw || s.rawName || s.rawMove || s.rawLabel || s.rawText || s.rawTitle || s.raw || s.rawName || s.raw;
+      // Prefer the explicit 'raw' field (we set it during composePureFlow)
+      const baseRaw = s.raw || s.rawName || s.rawMove || s.rawLabel || s.rawText || s.rawTitle || s.raw || s.rawName || s.raw;
+      const useRaw = baseRaw || (s.name ? s.name.replace(/^([LR])\s+(leg|arm)\s+/,"") : "—");
+      return {...s, side: ns, name: formatPureName(useRaw, sideType, ns)};
     }
     return {...s};
   });
@@ -1171,26 +1297,33 @@ let currentFlow = null;
 function renderPills(flow){
   ui.pillLine.innerHTML = "";
   if (!flow) return;
+  const hb = flow.hbEnabled ? "HB: ON" : "HB: OFF";
   ui.pillLine.innerHTML =
     `<span><b>${flow.date}</b></span>
      <span>•</span>
-     <span>Base: <b>${BASE_LABEL[flow.base]}</b></span>
+     <span>Animal Flow <b>Pure</b></span>
      <span>•</span>
-     <span>Intent: <b>${INTENT_LABEL[flow.intent]}</b></span>
+     <span>Start: <b>${flow.startSide}</b></span>
      <span>•</span>
-     <span>Feature: <b>${MOVES[flow.feature]?.name || flow.feature}</b></span>
+     <span>Length: <b>${flow.steps?.length || 0}</b></span>
      <span>•</span>
-     <span>Start: <b>${flow.startSide}</b></span>`;
+     <span>${hb}</span>`;
 }
 
 function renderFlowList(flow){
   ui.flowList.innerHTML="";
   if (!flow){ ui.flowTitle.textContent="—"; return; }
-  ui.flowTitle.textContent = `${BASE_LABEL[flow.base]} → ${MOVES[flow.feature]?.name || flow.feature}`;
+
+  // Title (PURE flows don't have base/feature)
+  if (flow.steps && flow.steps.length && !flow.base){
+    ui.flowTitle.textContent = `Animal Flow Pure — ${flow.steps.length} steps`;
+  } else {
+    ui.flowTitle.textContent = `${BASE_LABEL[flow.base]} → ${MOVES[flow.feature]?.name || flow.feature}`;
+  }
+
   const active = getActiveFlow() || flow;
 
-  active.steps.forEach((s,i)=>{
-    const m = MOVES[s.moveId];
+  (active.steps||[]).forEach((s,i)=>{
     const el=document.createElement("div");
     el.className="step";
     el.dataset.index=String(i);
@@ -1198,14 +1331,27 @@ function renderFlowList(flow){
       el.style.borderColor="rgba(123,220,255,.28)";
       el.style.background="rgba(123,220,255,.06)";
     }
-    const tags = [`<span class="tag">${m.type}</span>`];
-    if (m.type !== "SET" && (m.tags||[]).length) tags.push(`<span class="tag">${m.tags[0]}</span>`);
+
+    const isLegacy = !!s.moveId;
+    const m = isLegacy ? MOVES[s.moveId] : null;
+
+    const tags = [];
+    if (isLegacy && m){
+      tags.push(`<span class="tag">${m.type}</span>`);
+      if (m.type !== "SET" && (m.tags||[]).length) tags.push(`<span class="tag">${m.tags[0]}</span>`);
+    } else {
+      tags.push(`<span class="tag">PURE</span>`);
+      // If we have start/end shapes, show them as tiny hints
+      if (s.start && s.end) tags.push(`<span class="tag">${s.start}→${s.end}</span>`);
+    }
+
     el.innerHTML = `
       <div class="idx">${i+1}</div>
       <div style="flex:1">
-        <div class="main">${makeCallOut(s.moveId, s.side || active.startSide)}</div>
+        <div class="main">${escapeHTML(safeStepLabel(s, active.startSide || runner.side))}</div>
         <div class="miniTags">${tags.join("")}</div>
       </div>`;
+
     el.addEventListener("click", ()=>{
       runner.stepIndex=i;
       saveSession();
@@ -1217,6 +1363,7 @@ function renderFlowList(flow){
   });
 }
 
+
 function scrollToActiveStep(center=false){
   const el = ui.flowList.querySelector(`.step[data-index="${runner.stepIndex}"]`);
   if (el) el.scrollIntoView({behavior:"smooth", block:center?"center":"nearest"});
@@ -1225,13 +1372,18 @@ function scrollToActiveStep(center=false){
 function renderHistory(){
   const h = getHistory().slice(0,7);
   if (!h.length){ ui.historyBox.textContent="No history yet."; return; }
-  ui.historyBox.innerHTML = h.map(x=>`
-    <div style="margin-bottom:8px">
-      <span class="tag">${x.date}</span>
-      <span class="tag">${BASE_LABEL[x.base]}</span>
-      <span class="tag">${INTENT_LABEL[x.intent]}</span>
-      <span class="tag">${MOVES[x.feature]?.name || x.feature}</span>
-    </div>`).join("");
+  ui.historyBox.innerHTML = h.map(x=>{
+    const hb = x.hbEnabled ? "HB ON" : "HB OFF";
+    const n = (x.steps && x.steps.length) ? x.steps.length : 0;
+    return `
+      <div style="margin-bottom:8px">
+        <span class="tag">${x.date}</span>
+        <span class="tag">Pure</span>
+        <span class="tag">Start ${x.startSide}</span>
+        <span class="tag">${n} steps</span>
+        <span class="tag">${hb}</span>
+      </div>`;
+  }).join("");
 }
 
 function renderRunner(){
@@ -1253,7 +1405,7 @@ function renderRunner(){
 
   const flow = getActiveFlow();
   const step = flow.steps[runner.stepIndex];
-  const call = makeCallOut(step.moveId, step.side || runner.side);
+  const call = safeStepLabel(step, runner.side);
 
   let guidance="";
   if (runner.mode==="pieces"){
@@ -1303,9 +1455,65 @@ function setMode(tab){
 }
 
 function pushHistoryIfMissing(flow){
-  const h=getHistory();
-  if (h[0]?.date === flow.date) return;
-  pushHistory({date:flow.date, base:flow.base, feature:flow.feature, intent:flow.intent, style:flow.style, templateId: flow.templateId});
+  if (!flow) return;
+  const h = getHistory();
+  if (h.length && h[0].date === flow.date) return;
+  h.unshift(flow);
+  setHistory(h.slice(0,30));
+}
+
+
+
+/* ===========================
+   Manual blocks (Warm-up/Drills/HB)
+=========================== */
+const DRILL_POOL = [
+  { label:"Underswitch", both:true },
+  { label:"Side Kickthrough", both:true },
+  { label:"Scorpion", both:true },
+  { label:"Front Kickthrough", both:true },
+  { label:"Ape Reach", both:true },
+  { label:"Beast hold (10–20s)", both:false },
+  { label:"Crab hold (10–20s)", both:false },
+  { label:"Beast travel (1–2 reps)", both:true },
+  { label:"Crab reach step (1–2 reps)", both:true },
+  { label:"Wave unload/reload (1–2 reps)", both:true },
+];
+
+function pickDailyDrills(rng, n=4){
+  const pool=[...DRILL_POOL];
+  // Fisher–Yates shuffle with rng
+  for (let i=pool.length-1; i>0; i--){
+    const j = Math.floor(rng()*(i+1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  return pool.slice(0,n).map(d=>{
+    if (d.both) return `${d.label} — 1–2 reps each side`;
+    return `${d.label} — 1–2 quality sets`;
+  });
+}
+
+function renderDrills(flow){
+  const ul = document.getElementById("drillList");
+  if (!ul) return;
+  ul.innerHTML="";
+  const drills = flow?.drills || [];
+  if (!drills.length){
+    ul.innerHTML = `<li><span class="dot"></span>—</li>`;
+    return;
+  }
+  drills.forEach(t=>{
+    const li=document.createElement("li");
+    li.innerHTML = `<span class="dot"></span> ${escapeHTML(t)}`;
+    ul.appendChild(li);
+  });
+}
+
+function renderHBPractice(){
+  const el = document.getElementById("hbPractice");
+  if (!el) return;
+  const hbEnabled = !!ui.hbOn?.checked;
+  el.style.display = hbEnabled ? "" : "none";
 }
 
 function generateToday({override=false}={}){
@@ -1317,6 +1525,8 @@ function generateToday({override=false}={}){
     resetRunner(false);
     renderPills(currentFlow);
     renderFlowList(currentFlow);
+    renderDrills(currentFlow);
+    renderHBPractice();
     renderRunner();
     renderHistory();
     saveSession();
@@ -1326,8 +1536,9 @@ function generateToday({override=false}={}){
   const hbEnabled = ui.hbOn.checked;
   const seedKey = override ? `${date}#${Date.now()}` : date;
   const rng = mulberry32(hashStrToSeed(seedKey));
-  const anchors = pickDailyAnchors(rng, hbEnabled);
-  const flow = composeFlow2({...anchors, seedKey, hbEnabled});
+  const drills = pickDailyDrills(rng, 4);
+  const flow = composePureFlow({seedKey, hbEnabled});
+  flow.drills = drills;
 
   currentFlow=flow;
   setTodayFlow(flow);
@@ -1336,6 +1547,8 @@ function generateToday({override=false}={}){
   resetRunner(false);
   renderPills(flow);
   renderFlowList(flow);
+  renderDrills(flow);
+  renderHBPractice();
   renderRunner();
   renderHistory();
   saveSession();
@@ -1413,6 +1626,7 @@ ui.wakeOn.addEventListener("change", async ()=>{
 });
 ui.hbOn.addEventListener("change", ()=>{
   const s=getSettings(); s.hbOn=ui.hbOn.checked; setSettings(s);
+  renderHBPractice();
   generateToday({override:true});
 });
 ui.sideMode.addEventListener("change", ()=>{
@@ -1468,6 +1682,8 @@ ui.btnClear.addEventListener("click", ()=>{
     resetRunner(false);
     renderPills(currentFlow);
     renderFlowList(currentFlow);
+    renderDrills(currentFlow);
+    renderHBPractice();
     renderRunner();
     pushHistoryIfMissing(currentFlow);
   } else {
