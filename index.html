@@ -989,10 +989,10 @@ function phaseAtFromTemplate(template, i){
 
 
 /* ===========================
-   Animal Flow PURE (L1 + L2)
-   - Strict vocabulary (manual keys)
-   - Strict base-position transition charts
-   - No hybrids, no scoring, no templates
+   Animal Flow PURE (Level 1 expanded)
+   - Strict vocabulary based on the L1 manual base charts
+   - State-machine safe: every move has a clear start/end shape
+   - Expanded with the missing L1 movements while keeping generation stable
 =========================== */
 
 const SHAPE = { BEAST:"BEAST", CRAB:"CRAB", APE:"APE", LOADED_BEAST:"LOADED_BEAST" };
@@ -1002,43 +1002,65 @@ const SHAPE = { BEAST:"BEAST", CRAB:"CRAB", APE:"APE", LOADED_BEAST:"LOADED_BEAS
  * - id: stable key
  * - name: display name (Call Out command)
  * - start/end: base position state-machine nodes
- * - side: "LEG" | "ARM" | null  (whether it needs L/R callout)
+ * - side: "LEG" | "ARM" | null
+ * - kind: "SET" | "ST" | "FSS" | "TF"
  */
 const PURE_MOVES = [
-  // SET between base positions (manual language)
-  {id:"SET_LB", name:"Set Loaded Beast", start:SHAPE.BEAST, end:SHAPE.LOADED_BEAST, side:null},
-  {id:"SET_BEAST_FROM_LB", name:"Set Beast", start:SHAPE.LOADED_BEAST, end:SHAPE.BEAST, side:null},
-  {id:"SET_APE_FROM_BEAST", name:"Set Ape", start:SHAPE.BEAST, end:SHAPE.APE, side:null},
-  {id:"SET_BEAST_FROM_APE", name:"Set Beast", start:SHAPE.APE, end:SHAPE.BEAST, side:null},
-  {id:"SET_APE_FROM_CRAB", name:"Set Ape", start:SHAPE.CRAB, end:SHAPE.APE, side:null},
+  // SET / routing between base positions used in the L1 charts and flows
+  {id:"SET_LB", name:"Set Loaded Beast", start:SHAPE.BEAST, end:SHAPE.LOADED_BEAST, side:null, kind:"SET"},
+  {id:"SET_BEAST_FROM_LB", name:"Set Beast", start:SHAPE.LOADED_BEAST, end:SHAPE.BEAST, side:null, kind:"SET"},
+  {id:"SET_APE_FROM_BEAST", name:"Set Ape", start:SHAPE.BEAST, end:SHAPE.APE, side:null, kind:"SET"},
+  {id:"SET_BEAST_FROM_APE", name:"Set Beast", start:SHAPE.APE, end:SHAPE.BEAST, side:null, kind:"SET"},
+  {id:"SET_APE_FROM_CRAB", name:"Set Ape", start:SHAPE.CRAB, end:SHAPE.APE, side:null, kind:"SET"},
+  {id:"SET_APE_FROM_LB", name:"Set Ape", start:SHAPE.LOADED_BEAST, end:SHAPE.APE, side:null, kind:"SET"},
+  {id:"LEAP_TO_APE", name:"Leap to Deep Ape", start:SHAPE.LOADED_BEAST, end:SHAPE.APE, side:null, kind:"SET"},
 
-  // S&T (core L1/L2)
-  {id:"US_B2C", name:"Underswitch", start:SHAPE.BEAST, end:SHAPE.CRAB, side:"LEG"},
-  {id:"US_C2B", name:"Underswitch", start:SHAPE.CRAB, end:SHAPE.BEAST, side:"LEG"},
-  {id:"US_C2LB", name:"Underswitch to Loaded Beast", start:SHAPE.CRAB, end:SHAPE.LOADED_BEAST, side:"LEG"},
-  {id:"US_LB2C", name:"Underswitch", start:SHAPE.LOADED_BEAST, end:SHAPE.CRAB, side:"LEG"},
+  // Switches & Transitions — Beast
+  {id:"US_B2C", name:"Underswitch", start:SHAPE.BEAST, end:SHAPE.CRAB, side:"LEG", kind:"ST"},
+  {id:"UST_B2C", name:"Underswitch Tap", start:SHAPE.BEAST, end:SHAPE.CRAB, side:"LEG", kind:"ST"},
+  {id:"SKT_BEAST", name:"Side Kickthrough", start:SHAPE.BEAST, end:SHAPE.BEAST, side:"LEG", kind:"ST"},
+  {id:"JSKT_BEAST", name:"Jumping Side Kickthrough", start:SHAPE.BEAST, end:SHAPE.BEAST, side:"LEG", kind:"ST"},
+  {id:"LSKT_BEAST", name:"Levitating Side Kickthrough", start:SHAPE.BEAST, end:SHAPE.BEAST, side:"LEG", kind:"ST"},
+  {id:"SS_B2C", name:"Scorpion Switch", start:SHAPE.BEAST, end:SHAPE.CRAB, side:"LEG", kind:"ST"},
 
-  {id:"SKT_BEAST", name:"Side Kickthrough", start:SHAPE.BEAST, end:SHAPE.BEAST, side:"LEG"},
-  {id:"FS_CRAB", name:"Full Scorpion", start:SHAPE.CRAB, end:SHAPE.CRAB, side:"LEG"},
-  {id:"SS_BEAST", name:"Scorpion Switch", start:SHAPE.BEAST, end:SHAPE.BEAST, side:"LEG"},
+  // Switches & Transitions — Crab
+  {id:"US_C2B", name:"Underswitch", start:SHAPE.CRAB, end:SHAPE.BEAST, side:"LEG", kind:"ST"},
+  {id:"UST_C2B", name:"Underswitch Tap", start:SHAPE.CRAB, end:SHAPE.BEAST, side:"LEG", kind:"ST"},
+  {id:"JUS_C2B", name:"Jumping Underswitch", start:SHAPE.CRAB, end:SHAPE.BEAST, side:"LEG", kind:"ST"},
+  {id:"LUS_C2B", name:"Levitating Underswitch", start:SHAPE.CRAB, end:SHAPE.BEAST, side:"LEG", kind:"ST"},
+  {id:"FS_CRAB", name:"Full Scorpion", start:SHAPE.CRAB, end:SHAPE.CRAB, side:"LEG", kind:"ST"},
+  {id:"US_C2LB", name:"Underswitch to Loaded Beast", start:SHAPE.CRAB, end:SHAPE.LOADED_BEAST, side:"LEG", kind:"ST"},
 
-  // Loaded Beast S&T (L1 base chart)
-  {id:"FST_LB", name:"Front Step Through", start:SHAPE.LOADED_BEAST, end:SHAPE.LOADED_BEAST, side:"LEG"},
-  {id:"FKT_LB", name:"Front Kickthrough", start:SHAPE.LOADED_BEAST, end:SHAPE.LOADED_BEAST, side:"LEG"},
-  {id:"FSTEP_LB", name:"Front Step", start:SHAPE.LOADED_BEAST, end:SHAPE.LOADED_BEAST, side:"LEG"},
+  // Switches & Transitions — Loaded Beast
+  {id:"FSTEP_LB", name:"Front Step", start:SHAPE.LOADED_BEAST, end:SHAPE.LOADED_BEAST, side:"LEG", kind:"ST"},
+  {id:"FST_LB", name:"Front Step Through", start:SHAPE.LOADED_BEAST, end:SHAPE.LOADED_BEAST, side:"LEG", kind:"ST"},
+  {id:"FKT_LB", name:"Front Kickthrough", start:SHAPE.LOADED_BEAST, end:SHAPE.LOADED_BEAST, side:"LEG", kind:"ST"},
+  {id:"US_LB2C", name:"Underswitch", start:SHAPE.LOADED_BEAST, end:SHAPE.CRAB, side:"LEG", kind:"ST"},
 
-  // Traveling Forms (L1/L2 keys)
-  {id:"TF_BEAST_FWD", name:"Forward Traveling Beast", start:SHAPE.BEAST, end:SHAPE.BEAST, side:null},
-  {id:"TF_BEAST_REV", name:"Reverse Traveling Beast", start:SHAPE.BEAST, end:SHAPE.BEAST, side:null},
-  {id:"TF_BEAST_LAT", name:"Lateral Traveling Beast", start:SHAPE.BEAST, end:SHAPE.BEAST, side:null},
+  // Form Specific Stretches — Ape
+  {id:"APE_REACH", name:"Ape Reach", start:SHAPE.APE, end:SHAPE.APE, side:null, kind:"FSS"},
 
-  {id:"TF_CRAB_FWD", name:"Forward Traveling Crab", start:SHAPE.CRAB, end:SHAPE.CRAB, side:null},
-  {id:"TF_CRAB_REV", name:"Reverse Traveling Crab", start:SHAPE.CRAB, end:SHAPE.CRAB, side:null},
+  // Form Specific Stretches — Crab
+  {id:"CRAB_REACH", name:"Crab Reach", start:SHAPE.CRAB, end:SHAPE.CRAB, side:"ARM", kind:"FSS"},
 
-  {id:"TF_APE_FWD", name:"Forward Traveling Ape", start:SHAPE.APE, end:SHAPE.APE, side:null},
-  {id:"TF_APE_LAT1", name:"Lateral Traveling Ape (Low Hip)", start:SHAPE.APE, end:SHAPE.APE, side:null},
-  {id:"TF_APE_LAT2", name:"Lateral Traveling Ape (High Hip)", start:SHAPE.APE, end:SHAPE.APE, side:null},
-  {id:"TF_APE_LAT3", name:"Lateral Traveling Ape (Reaching)", start:SHAPE.APE, end:SHAPE.APE, side:null},
+  // Form Specific Stretches — Beast / Loaded Beast
+  // We model these as self-returning FSS entries so the generator stays stable.
+  {id:"SR_BEAST", name:"Scorpion Reach", start:SHAPE.BEAST, end:SHAPE.BEAST, side:"LEG", kind:"FSS"},
+  {id:"LBU_LB", name:"Loaded Beast Unload", start:SHAPE.LOADED_BEAST, end:SHAPE.LOADED_BEAST, side:null, kind:"FSS"},
+  {id:"WU_LB", name:"Wave Unload", start:SHAPE.LOADED_BEAST, end:SHAPE.LOADED_BEAST, side:null, kind:"FSS"},
+  {id:"BR_LB", name:"Beast Reach", start:SHAPE.LOADED_BEAST, end:SHAPE.LOADED_BEAST, side:"ARM", kind:"FSS"},
+  {id:"SR_LB", name:"Scorpion Reach", start:SHAPE.LOADED_BEAST, end:SHAPE.LOADED_BEAST, side:"LEG", kind:"FSS"},
+
+  // Traveling Forms
+  {id:"TF_BEAST_FWD", name:"Forward Traveling Beast", start:SHAPE.BEAST, end:SHAPE.BEAST, side:null, kind:"TF"},
+  {id:"TF_BEAST_REV", name:"Reverse Traveling Beast", start:SHAPE.BEAST, end:SHAPE.BEAST, side:null, kind:"TF"},
+  {id:"TF_BEAST_LAT", name:"Lateral Traveling Beast", start:SHAPE.BEAST, end:SHAPE.BEAST, side:null, kind:"TF"},
+  {id:"TF_CRAB_FWD", name:"Forward Traveling Crab", start:SHAPE.CRAB, end:SHAPE.CRAB, side:null, kind:"TF"},
+  {id:"TF_CRAB_REV", name:"Reverse Traveling Crab", start:SHAPE.CRAB, end:SHAPE.CRAB, side:null, kind:"TF"},
+  {id:"TF_APE_FWD", name:"Forward Traveling Ape", start:SHAPE.APE, end:SHAPE.APE, side:null, kind:"TF"},
+  {id:"TF_APE_LAT1", name:"Lateral Traveling Ape (Low Hip)", start:SHAPE.APE, end:SHAPE.APE, side:null, kind:"TF"},
+  {id:"TF_APE_LAT2", name:"Lateral Traveling Ape (High Hip)", start:SHAPE.APE, end:SHAPE.APE, side:null, kind:"TF"},
+  {id:"TF_APE_LAT3", name:"Lateral Traveling Ape (Reaching)", start:SHAPE.APE, end:SHAPE.APE, side:null, kind:"TF"},
 ];
 
 const PURE_BY_START = PURE_MOVES.reduce((acc,m)=>{
@@ -1046,45 +1068,117 @@ const PURE_BY_START = PURE_MOVES.reduce((acc,m)=>{
   return acc;
 }, {});
 
-// Helper: avoid immediate repeats, and avoid set spam
-function pureCandidates(stateShape, lastId){
+function pureCandidates(stateShape, lastId, ctx={}){
   let c = (PURE_BY_START[stateShape] || []).slice();
   if (lastId) c = c.filter(x=>x.id !== lastId);
 
-  // Keep "Set ..." transitions from dominating: if there are any non-SET options, prefer them.
-  const nonSet = c.filter(x=>!x.id.startsWith("SET_"));
+  // Keep generation stable and readable.
+  if ((ctx.fssCount || 0) >= 2) c = c.filter(x=>x.kind !== "FSS");
+  if ((ctx.setCount || 0) >= 1) c = c.filter(x=>x.kind !== "SET");
+  if ((ctx.travelStreak || 0) >= 2) c = c.filter(x=>x.kind !== "TF");
+
+  // Avoid same-named move immediately again, even if it is a different variant id.
+  if (ctx.lastRawName){
+    const withoutSameName = c.filter(x=>x.name !== ctx.lastRawName);
+    if (withoutSameName.length) c = withoutSameName;
+  }
+
+  // Prefer non-SET when the shape already has real options.
+  const nonSet = c.filter(x=>x.kind !== "SET");
   if (nonSet.length) c = nonSet;
 
   return c;
 }
 
 function formatPureMove(move, side){
-  if (move.side === "LEG"){
-    return `${side} leg ${move.name}`;
-  }
-  if (move.side === "ARM"){
-    return `${side} arm ${move.name}`;
-  }
+  if (move.side === "LEG") return `${side} leg ${move.name}`;
+  if (move.side === "ARM") return `${side} arm ${move.name}`;
   return move.name;
+}
+
+function choosePureSide(rng, move, prevStep, startSide){
+  if (!move.side) return null;
+
+  // Pure flows break down quickly when every sideable move stays on the same side.
+  // So even in "per flow" mode we keep a start-side bias, but alternate
+  // consecutive sideable actions unless there is a strong reason not to.
+  if (!prevStep || !prevStep.side) return startSide;
+
+  // Same raw family back-to-back should definitely flip.
+  if (prevStep.raw === move.name) return prevStep.side === "L" ? "R" : "L";
+
+  // For most sideable Level 1 moves, alternating side is the safest default.
+  // Add a tiny bit of variety after a neutral/non-sideable move separated the chain.
+  return prevStep.side === "L" ? "R" : "L";
+}
+
+function weightedPurePick(rng, cands, ctx={}){
+  if (!cands.length) return null;
+
+  const weighted = cands.map(move=>{
+    let w = 1;
+
+    // Keep the flow mostly ST-driven.
+    if (move.kind === "ST") w += 2.8;
+    if (move.kind === "TF") w += 1.5;
+    if (move.kind === "FSS") w += 0.5;
+    if (move.kind === "SET") w -= 0.4;
+
+    // Delay FSS a little so flows do not start too stretchy.
+    if ((ctx.stepIndex || 0) < 2 && move.kind === "FSS") w -= 0.7;
+
+    // If we have not travelled yet, softly encourage one travel somewhere mid-flow.
+    if (!(ctx.travelUsed) && (ctx.stepIndex || 0) >= 2 && move.kind === "TF") w += 1.2;
+
+    // If the last move was travel, prefer S&T next.
+    if (ctx.lastKind === "TF" && move.kind === "ST") w += 0.9;
+    if (ctx.lastKind === "ST" && move.kind === "FSS") w += 0.3;
+
+    // Avoid too many FSS or SET moments close together.
+    if (ctx.lastKind === move.kind && (move.kind === "FSS" || move.kind === "SET")) w -= 0.8;
+
+    return {move, w: Math.max(0.1, w)};
+  });
+
+  const total = weighted.reduce((sum,x)=>sum+x.w,0);
+  let r = rng() * total;
+  for (const item of weighted){
+    r -= item.w;
+    if (r <= 0) return item.move;
+  }
+  return weighted[weighted.length-1].move;
 }
 
 function composePureFlow({seedKey, hbEnabled}){
   const rng = mulberry32(hashStrToSeed(seedKey));
   const startSide = rng() < 0.5 ? "L" : "R";
-  const pickSide = makeSidePicker(rng, startSide);
 
   const len = 6 + Math.floor(rng()*3); // 6–8
-  let shape = SHAPE.BEAST; // start position for the written flow
+  let shape = SHAPE.BEAST;
 
   const steps = [];
   let lastId = null;
+  let lastRawName = null;
+  let lastKind = null;
+  let fssCount = 0;
+  let setCount = 0;
+  let travelStreak = 0;
+  let travelUsed = false;
 
   for (let i=0; i<len; i++){
-    const cands = pureCandidates(shape, lastId);
+    const cands = pureCandidates(shape, lastId, {
+      fssCount,
+      setCount,
+      travelStreak,
+      lastRawName,
+    });
     if (!cands.length) break;
 
-    const move = cands[Math.floor(rng()*cands.length)];
-    const side = (move.side ? pickSide() : null);
+    const move = weightedPurePick(rng, cands, {stepIndex:i, lastKind, travelUsed});
+    if (!move) break;
+
+    const prevStep = steps.length ? steps[steps.length - 1] : null;
+    const side = move.side ? choosePureSide(rng, move, prevStep, startSide) : null;
 
     steps.push({
       id: move.id,
@@ -1093,16 +1187,26 @@ function composePureFlow({seedKey, hbEnabled}){
       start: move.start,
       end: move.end,
       side: side,
-      sideType: move.side
+      sideType: move.side,
+      kind: move.kind
     });
 
     shape = move.end;
     lastId = move.id;
+    lastRawName = move.name;
+    lastKind = move.kind;
+    if (move.kind === "FSS") fssCount++;
+    if (move.kind === "SET") setCount++;
+    if (move.kind === "TF") {
+      travelStreak++;
+      travelUsed = true;
+    } else {
+      travelStreak = 0;
+    }
   }
 
   return { seedKey, hbEnabled, startSide, steps };
 }
-
 
 function mirrorFlow(flow){
   const mirrored = deepCopy(flow);
