@@ -293,7 +293,7 @@
 
         <div id="modePieces" class="mode">
           <div class="kv">
-            <label>Reps per kant</label>
+            <label>Reps per side</label>
             <select id="piecesReps">
               <option value="1">1</option>
               <option value="3">3</option>
@@ -301,27 +301,27 @@
             </select>
           </div>
           <div class="kv">
-            <label>Beide kanten</label>
+            <label>Both sides</label>
             <input type="checkbox" id="piecesBothSides" checked />
           </div>
-          <div class="hint">5 reps per kant om de losse pieces goed te leren.</div>
+          <div class="hint">5 reps per side to learn each piece with control.</div>
         </div>
 
         <div id="modeLinked" class="mode" style="display:none">
           <div class="kv">
-            <label>Gelinkte herhalingen</label>
+            <label>Linked cycles</label>
             <select id="linkedFlows">
               <option value="1">1</option>
               <option value="2">2</option>
               <option value="3" selected>3</option>
             </select>
           </div>
-          <div class="hint">1-3 linked reps om de flow te leren kennen.</div>
+          <div class="hint">1-3 linked cycles to get to know the flow.</div>
         </div>
 
         <div id="modeTimed" class="mode" style="display:none">
           <div class="kv">
-            <label>Duur (minuten)</label>
+            <label>Flow time (minutes)</label>
             <select id="timedMinutes">
               <option value="10" selected>10</option>
               <option value="15">15</option>
@@ -330,7 +330,7 @@
               <option value="30">30</option>
             </select>
           </div>
-          <div class="hint">Zo veel mogelijk kwalitatieve reps binnen 10-30 minuten.</div>
+          <div class="hint">As many quality reps as possible within 10-30 minutes.</div>
         </div>
       
         <div class="hr"></div>
@@ -364,7 +364,7 @@
         </div>
         <div class="row" style="justify-content:flex-end">
           <span class="tag" id="badgeSeg">SEG 1</span>
-          <span class="tag" id="badgeSide">L</span>
+          
           <span class="tag" id="badgeStep">STEP 1</span>
         </div>
       </div>
@@ -400,16 +400,7 @@
         <details>
           <summary>Settings</summary>
           <div class="detailsBody">
-            <div class="kv">
-              <label>Side mixing</label>
-              <select id="sideMode">
-                <option value="flow" selected>Per flow (all same side)</option>
-                <option value="alt">Alternate (L/R each sideable step)</option>
-                <option value="shuffle">Shuffle (safe)</option>
-              </select>
-            </div>
-
-            <div class="kv">
+<div class="kv">
               <label>Sound (beeps)</label>
               <input type="checkbox" id="soundOn" checked />
             </div>
@@ -630,9 +621,8 @@ function saveSession(){
       piecesBothSides: ui.piecesBothSides.checked,
       linkedFlows: ui.linkedFlows.value,
       timedMinutes: ui.timedMinutes.value,
-      microBreakN: ui.microBreakN.value,
-      sideMode: ui.sideMode.value
-    }
+      microBreakN: ui.microBreakN?.value ?? "0",
+}
   };
   try{ localStorage.setItem(LS.SESSION, JSON.stringify(pack)); }catch(e){}
 }
@@ -760,7 +750,7 @@ function applyMove(state, moveId, side){
    Side assignment within flow (user setting)
 =========================== */
 function makeSidePicker(rng, startSide){
-  const mode = ui.sideMode?.value || "flow";
+  const mode = "flow";
   let last = startSide;
   let same = 0;
   return function pickSide(){
@@ -1514,7 +1504,7 @@ function resetRunner(full=true){
   const mins = parseInt(ui.timedMinutes.value,10);
   runner.timerTotal = mins*60;
   runner.timerLeft = runner.timerTotal;
-  runner.microBreakN = parseInt(ui.microBreakN.value,10);
+  runner.microBreakN = parseInt(ui.microBreakN?.value ?? "0",10);
 
   ui.bigTimer.style.display = (runner.mode==="timed") ? "" : "none";
   ui.progressWrap.style.display = (runner.mode==="timed") ? "" : "none";
@@ -1526,8 +1516,6 @@ function resetRunner(full=true){
 function getActiveFlow(){
   if (!currentFlow) return null;
   if (!hasSideSpecificSteps(currentFlow)) return currentFlow;
-  const mode = ui.sideMode?.value || "flow";
-  if (mode !== "flow") return currentFlow;
   return (runner.side === currentFlow.startSide) ? currentFlow : mirrorFlow(currentFlow);
 }
 
@@ -1553,11 +1541,9 @@ function advanceLinked(){
     const perSide=parseInt(ui.linkedFlows.value,10);
     const totalTarget=perSide*2;
     const currentInBlock = runner.flowsDone % totalTarget;
-    if (ui.sideMode.value === "flow"){
-      if (currentInBlock === perSide){
-        runner.side = runner.side==="L"?"R":"L";
-        beep(880,120);
-      }
+    if (currentInBlock === perSide){
+      runner.side = runner.side==="L"?"R":"L";
+      beep(880,120);
     }
     runner.stepIndex=0;
   } else runner.stepIndex++;
@@ -1571,7 +1557,7 @@ function advanceTimed(){
     runner.flowsDone++;
     beep(1200,70);
     runner.stepIndex=0;
-    const n=parseInt(ui.microBreakN.value,10);
+    const n=parseInt(ui.microBreakN?.value ?? "0",10);
     if (n>0 && runner.flowsDone % n === 0) beep(660,150);
   } else runner.stepIndex++;
   saveSession();
@@ -1596,8 +1582,7 @@ const ui = {
   microBreakN: document.getElementById("microBreakN"),
   runnerTitle: document.getElementById("runnerTitle"),
   badgeSeg: document.getElementById("badgeSeg"),
-  badgeSide: document.getElementById("badgeSide"),
-  badgeStep: document.getElementById("badgeStep"),
+badgeStep: document.getElementById("badgeStep"),
   calloutBox: document.getElementById("calloutBox"),
   bigTimer: document.getElementById("bigTimer"),
   progressWrap: document.getElementById("progressWrap"),
@@ -1614,8 +1599,7 @@ const ui = {
   btnPrev: document.getElementById("btnPrev"),
   btnNext: document.getElementById("btnNext"),
   btnRep: document.getElementById("btnRep"),
-  sideMode: document.getElementById("sideMode"),
-  soundOn: document.getElementById("soundOn"),
+soundOn: document.getElementById("soundOn"),
   wakeOn: document.getElementById("wakeOn"),
   hbOn: document.getElementById("hbOn"),
   historyBox: document.getElementById("historyBox"),
@@ -1719,7 +1703,7 @@ function renderHistory(){
 function renderRunner(){
   if (!currentFlow){
     ui.calloutBox.textContent="Generate a flow to begin.";
-    ui.badgeSide.textContent="—";
+
     ui.badgeStep.textContent="—";
     ui.bigTimer.textContent="00:00";
     ui.progressBar.style.width="0%";
@@ -1730,7 +1714,7 @@ function renderRunner(){
   }
 
   ui.badgeSeg.textContent = `SEG ${runner.segment}`;
-  ui.badgeSide.textContent = runner.side;
+
   ui.badgeStep.textContent = `STEP ${runner.stepIndex+1}`;
 
   const flow = getActiveFlow();
@@ -1743,18 +1727,18 @@ function renderRunner(){
   if (runner.mode==="pieces"){
     const reps=parseInt(ui.piecesReps.value,10);
     guidance = !sideAware
-      ? `${reps} reps per kant. Leer elke piece los en met controle.`
+      ? `${reps} reps per side. Learn each piece cleanly and with control.`
       : ui.piecesBothSides.checked
-      ? `${reps} reps op ${runner.side}, daarna ${reps} op ${runner.side==="L"?"R":"L"}.`
-      : `${reps} reps op ${runner.side}.`;
+      ? `${reps} reps on ${runner.side}, then ${reps} on ${runner.side==="L"?"R":"L"}.`
+      : `${reps} reps on ${runner.side}.`;
   } else if (runner.mode==="linked"){
     const perSide=parseInt(ui.linkedFlows.value,10);
     guidance = sideAware
-      ? `${perSide} linked reps per kant met als doel de flow te leren kennen.`
-      : `${perSide} linked reps om de flow te leren kennen.`;
+      ? `${perSide} linked cycles per side to learn the flow.`
+      : `${perSide} linked cycles to learn the flow.`;
   } else {
     const mins=parseInt(ui.timedMinutes.value,10);
-    guidance = `Zo veel mogelijk kwalitatieve reps in ${mins} minuten.`;
+    guidance = `As many quality reps as possible in ${mins} minutes.`;
   }
 
   if (runner.stepIndex === 0 && startCue){
@@ -1920,8 +1904,8 @@ ui.btnResume.addEventListener("click", async ()=>{
     ui.piecesBothSides.checked = pack.ui.piecesBothSides ?? ui.piecesBothSides.checked;
     ui.linkedFlows.value = pack.ui.linkedFlows ?? ui.linkedFlows.value;
     ui.timedMinutes.value = pack.ui.timedMinutes ?? ui.timedMinutes.value;
-    ui.microBreakN.value = pack.ui.microBreakN ?? ui.microBreakN.value;
-    ui.sideMode.value = pack.ui.sideMode ?? ui.sideMode.value;
+    if (ui.microBreakN) ui.microBreakN.value = pack.ui.microBreakN ?? ui.microBreakN.value;
+
     setMode(pack.ui.tab || "pieces");
   }
   resetRunner(false);
@@ -1977,13 +1961,8 @@ ui.hbOn.addEventListener("change", ()=>{
   renderHBPractice();
   generateToday({override:true});
 });
-ui.sideMode.addEventListener("change", ()=>{
-  const s=getSettings(); s.sideMode=ui.sideMode.value; setSettings(s);
-  generateToday({override:true});
-});
-
 ui.timedMinutes.addEventListener("change", ()=>{ resetRunner(false); renderRunner(); });
-ui.microBreakN.addEventListener("change", ()=>{ runner.microBreakN=parseInt(ui.microBreakN.value,10); saveSession(); });
+if (ui.microBreakN) ui.microBreakN.addEventListener("change", ()=>{ runner.microBreakN=parseInt(ui.microBreakN?.value ?? "0",10); saveSession(); });
 
 ui.btnClear.addEventListener("click", ()=>{
   if (!confirm("Clear history + saved session + today's flow?")) return;
@@ -2003,7 +1982,7 @@ ui.btnClear.addEventListener("click", ()=>{
   if (typeof s.soundOn==="boolean") ui.soundOn.checked=s.soundOn;
   if (typeof s.wakeOn==="boolean") ui.wakeOn.checked=s.wakeOn;
   if (typeof s.hbOn==="boolean") ui.hbOn.checked=s.hbOn;
-  if (typeof s.sideMode==="string") ui.sideMode.value=s.sideMode;
+
 
   const tf=getTodayFlow();
   if (tf && tf.date===todayISO()) currentFlow=tf;
@@ -2018,8 +1997,8 @@ ui.btnClear.addEventListener("click", ()=>{
       ui.piecesBothSides.checked = pack.ui.piecesBothSides ?? ui.piecesBothSides.checked;
       ui.linkedFlows.value = pack.ui.linkedFlows ?? ui.linkedFlows.value;
       ui.timedMinutes.value = pack.ui.timedMinutes ?? ui.timedMinutes.value;
-      ui.microBreakN.value = pack.ui.microBreakN ?? ui.microBreakN.value;
-      ui.sideMode.value = pack.ui.sideMode ?? ui.sideMode.value;
+      if (ui.microBreakN) ui.microBreakN.value = pack.ui.microBreakN ?? ui.microBreakN.value;
+  
     }
   }
 
@@ -2044,10 +2023,3 @@ ui.btnClear.addEventListener("click", ()=>{
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
