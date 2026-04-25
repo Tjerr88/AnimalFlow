@@ -72,6 +72,7 @@
       color:var(--muted); font-size:12px;
     }
     .pillline b{color:var(--text);font-weight:650}
+    .appMeta{margin-top:6px;color:var(--muted);font-size:12px}
     .flowlist{display:flex;flex-direction:column;gap:8px}
     .step{
       border:1px solid var(--border);
@@ -181,12 +182,12 @@
   <header>
     <div>
       <h1>Animal Flow Pure</h1>
-      <div class="sub">Daily flow built with L1 + L2 flow language logic (Set bases, movement window checks, energy intent, one feature movement). 5–5–10 runner included.</div>
+      <div class="appMeta">Daily standalone flow.</div>
       <div class="pillline" id="pillLine"></div>
     </div>
     <div class="topActions">
-      <button class="primary" id="btnNew">Generate Today</button>
-      <button class="ghost" id="btnRegen">Regenerate</button>
+      <button class="primary" id="btnNew">Generate</button>
+      <button class="ghost" id="btnRegen">New Flow</button>
       <button class="ghost" id="btnResume">Resume</button>
     </div>
   </header>
@@ -195,13 +196,13 @@
     <section class="card">
       <div class="hd">
         <div class="left">
-          <div class="k">Today’s Flow</div>
+          
           <div class="v" id="flowTitle">—</div>
         </div>
         <div class="tabs" id="tabs">
-          <div class="tab active" data-tab="pieces">Pieces (5)</div>
-          <div class="tab" data-tab="linked">Linked (5)</div>
-          <div class="tab" data-tab="timed">Timed (10)</div>
+          <div class="tab active" data-tab="pieces">Pieces</div>
+          <div class="tab" data-tab="linked">Linked</div>
+          <div class="tab" data-tab="timed">Flow</div>
         </div>
       </div>
       <div class="bd">
@@ -221,7 +222,7 @@
         </div>
       </div>
 
-      <details id="warmupBlock" class="block" open>
+      <details id="warmupBlock" class="block">
         <summary>
           <div class="sumrow">
             <div>
@@ -275,12 +276,12 @@
 
       <div id="drillCard" class="block">
         <div class="bhd">
-          <div class="k">Daily Drill Card</div>
-          <div class="hint">Keep L1 basics alive: 1–2 clean reps each (tech focus).</div>
+          <div class="k">Drills</div>
+          <div class="hint">Optional prep</div>
         </div>
         <div class="bbody">
           <ul id="drillList" class="checklist"></ul>
-          <div class="note">Rule: no grind. Treat these as “skill reps” before Segment 1.</div>
+          <div class="note">Keep these light and technical.</div>
         </div>
       </div>
 
@@ -292,54 +293,44 @@
 
         <div id="modePieces" class="mode">
           <div class="kv">
-            <label>Reps per step (per side)</label>
+            <label>Reps per kant</label>
             <select id="piecesReps">
               <option value="1">1</option>
-              <option value="3" selected>3</option>
-              <option value="5">5</option>
+              <option value="3">3</option>
+              <option value="5" selected>5</option>
             </select>
           </div>
           <div class="kv">
-            <label>Do both sides (mirror after each step)</label>
+            <label>Beide kanten</label>
             <input type="checkbox" id="piecesBothSides" checked />
           </div>
-          <div class="hint">Segment 1 is rep-based: polish each step cleanly before linking.</div>
+          <div class="hint">5 reps per kant om de losse pieces goed te leren.</div>
         </div>
 
         <div id="modeLinked" class="mode" style="display:none">
           <div class="kv">
-            <label>Flows per side</label>
+            <label>Gelinkte herhalingen</label>
             <select id="linkedFlows">
               <option value="1">1</option>
               <option value="2">2</option>
               <option value="3" selected>3</option>
-              <option value="5">5</option>
             </select>
           </div>
-          <div class="hint">Segment 2: run the whole flow repeatedly (auto counts + switches).</div>
+          <div class="hint">1-3 linked reps om de flow te leren kennen.</div>
         </div>
 
         <div id="modeTimed" class="mode" style="display:none">
           <div class="kv">
-            <label>Timer (minutes)</label>
+            <label>Duur (minuten)</label>
             <select id="timedMinutes">
-              <option value="6">6</option>
-              <option value="8">8</option>
               <option value="10" selected>10</option>
-              <option value="12">12</option>
               <option value="15">15</option>
+              <option value="20">20</option>
+              <option value="25">25</option>
+              <option value="30">30</option>
             </select>
           </div>
-          <div class="kv">
-            <label>Micro-break every N flows (0=off)</label>
-            <select id="microBreakN">
-              <option value="0">0</option>
-              <option value="2">2</option>
-              <option value="3" selected>3</option>
-              <option value="4">4</option>
-            </select>
-          </div>
-          <div class="hint">Segment 3: “constant but various motion”. Micro-breaks act as quality resets.</div>
+          <div class="hint">Zo veel mogelijk kwalitatieve reps binnen 10-30 minuten.</div>
         </div>
       
         <div class="hr"></div>
@@ -913,13 +904,248 @@ function formatPureName(rawName, sideType, side){
 
 function safeStepLabel(step, fallbackSide="L"){
   // For legacy/scored flows: step.moveId exists.
-  if (step && step.moveId){
+  if (step && step.moveId && MOVES[step.moveId]){
     return makeCallOut(step.moveId, step.side || fallbackSide);
   }
-  // For PURE flows: step.name is already pre-formatted.
+  // For AF closed-loop steps: use the supplied display name.
   if (step && step.name) return step.name;
+  // For PURE flows: step.name is already pre-formatted.
   // Last resort
   return "—";
+}
+/* ===========================
+   Closed-loop AF engine (from merged generator)
+=========================== */
+const AF_BASE_LABEL = { CRAB:"Crab", BEAST:"Beast", LOADED_BEAST:"Loaded Beast", APE:"Deep Ape" };
+
+const AF_MOVES = {
+  SET_BEAST_FROM_APE: { id:"SET_BEAST_FROM_APE", name:"Set Beast", kind:"SET", start:"APE", end:"BEAST", family:"SET", phase:"L1" },
+  SET_CRAB_FROM_APE: { id:"SET_CRAB_FROM_APE", name:"Set Crab", kind:"SET", start:"APE", end:"CRAB", family:"SET", phase:"L1" },
+  SET_LB_FROM_APE: { id:"SET_LB_FROM_APE", name:"Set Loaded Beast", kind:"SET", start:"APE", end:"LOADED_BEAST", family:"SET", phase:"L1" },
+  APE_REACH: { id:"APE_REACH", name:"Ape Reach", kind:"FSS", start:"APE", end:"APE", family:"FSS", phase:"L1" },
+  TF_APE_FWD: { id:"TF_APE_FWD", name:"Forward Traveling Ape", kind:"TF", start:"APE", end:"APE", family:"TF", phase:"L1_TF" },
+  TF_APE_LAT1: { id:"TF_APE_LAT1", name:"Lateral Traveling Ape (Low Hip)", kind:"TF", start:"APE", end:"APE", family:"TF", phase:"L1_TF" },
+  TF_APE_LAT2: { id:"TF_APE_LAT2", name:"Lateral Traveling Ape (High Hip)", kind:"TF", start:"APE", end:"APE", family:"TF", phase:"L1_TF" },
+  TF_APE_LAT3: { id:"TF_APE_LAT3", name:"Lateral Traveling Ape (Reaching)", kind:"TF", start:"APE", end:"APE", family:"TF", phase:"L1_TF" },
+
+  SET_LB_FROM_BEAST: { id:"SET_LB_FROM_BEAST", name:"Set Loaded Beast", kind:"SET", start:"BEAST", end:"LOADED_BEAST", family:"SET", phase:"L1" },
+  SET_APE_FROM_BEAST: { id:"SET_APE_FROM_BEAST", name:"Set Deep Ape", kind:"SET", start:"BEAST", end:"APE", family:"SET", phase:"L1" },
+  US_B2C: { id:"US_B2C", name:"Underswitch", kind:"ST", start:"BEAST", end:"CRAB", family:"US", phase:"L1" },
+  UST_BEAST: { id:"UST_BEAST", name:"Underswitch Tap", kind:"ST", start:"BEAST", end:"BEAST", family:"UST", phase:"L1" },
+  SKT_BEAST: { id:"SKT_BEAST", name:"Side Kickthrough", kind:"ST", start:"BEAST", end:"BEAST", family:"SKT", phase:"L1" },
+  SS_B2C: { id:"SS_B2C", name:"Scorpion Switch", kind:"ST", start:"BEAST", end:"CRAB", family:"SCORPION", phase:"L1" },
+  SR_BEAST: { id:"SR_BEAST", name:"Scorpion Reach", kind:"FSS", start:"BEAST", end:"BEAST", family:"FSS", phase:"L1" },
+  TF_BEAST_FWD: { id:"TF_BEAST_FWD", name:"Forward Traveling Beast", kind:"TF", start:"BEAST", end:"BEAST", family:"TF", phase:"L1_TF" },
+  TF_BEAST_REV: { id:"TF_BEAST_REV", name:"Reverse Traveling Beast", kind:"TF", start:"BEAST", end:"BEAST", family:"TF", phase:"L1_TF" },
+  TF_BEAST_LAT: { id:"TF_BEAST_LAT", name:"Lateral Traveling Beast", kind:"TF", start:"BEAST", end:"BEAST", family:"TF", phase:"L1_TF" },
+  BEAR_BEAST: { id:"BEAR_BEAST", name:"Bear", kind:"TF", start:"BEAST", end:"BEAST", family:"LOCO", phase:"LOCO" },
+  LEOPARD_BEAST: { id:"LEOPARD_BEAST", name:"Leopard", kind:"TF", start:"BEAST", end:"BEAST", family:"LOCO", phase:"LOCO" },
+
+  SET_APE_FROM_CRAB: { id:"SET_APE_FROM_CRAB", name:"Set Deep Ape", kind:"SET", start:"CRAB", end:"APE", family:"SET", phase:"L1" },
+  US_C2B: { id:"US_C2B", name:"Underswitch", kind:"ST", start:"CRAB", end:"BEAST", family:"US", phase:"L1" },
+  UST_CRAB: { id:"UST_CRAB", name:"Underswitch Tap", kind:"ST", start:"CRAB", end:"CRAB", family:"UST", phase:"L1" },
+  JUS_CRAB: { id:"JUS_CRAB", name:"Jumping Underswitch", kind:"ST", start:"CRAB", end:"CRAB", family:"US", phase:"L1" },
+  FS_CRAB: { id:"FS_CRAB", name:"Full Scorpion", kind:"ST", start:"CRAB", end:"CRAB", family:"SCORPION", phase:"L1" },
+  CRAB_REACH: { id:"CRAB_REACH", name:"Crab Reach", kind:"FSS", start:"CRAB", end:"CRAB", family:"FSS", phase:"L1" },
+  US_C2LB: { id:"US_C2LB", name:"Underswitch to Loaded Beast", kind:"ST", start:"CRAB", end:"LOADED_BEAST", family:"US", phase:"L1" },
+  TF_CRAB_FWD: { id:"TF_CRAB_FWD", name:"Forward Traveling Crab", kind:"TF", start:"CRAB", end:"CRAB", family:"TF", phase:"L1_TF" },
+  TF_CRAB_REV: { id:"TF_CRAB_REV", name:"Reverse Traveling Crab", kind:"TF", start:"CRAB", end:"CRAB", family:"TF", phase:"L1_TF" },
+  USA_CRAB: { id:"USA_CRAB", name:"Underswitch to Deep Ape", kind:"ST", start:"CRAB", end:"APE", family:"L2_CORE", phase:"L2_CORE" },
+  RT_CRAB: { id:"RT_CRAB", name:"Roll Through", kind:"ST", start:"CRAB", end:"CRAB", family:"L2_CORE", phase:"L2_CORE" },
+  CROCR_CRAB: { id:"CROCR_CRAB", name:"Crocodile Roll", kind:"ST", start:"CRAB", end:"CRAB", family:"ADV", phase:"L2_ADV" },
+  PO_CRAB: { id:"PO_CRAB", name:"Pop Out", kind:"ST", start:"CRAB", end:"APE", family:"ADV", phase:"L2_ADV" },
+  CROC_CRAWL_CRAB: { id:"CROC_CRAWL_CRAB", name:"Crocodile Crawl", kind:"TF", start:"CRAB", end:"CRAB", family:"LOCO", phase:"LOCO" },
+
+  SET_BEAST_FROM_LB: { id:"SET_BEAST_FROM_LB", name:"Set Beast", kind:"SET", start:"LOADED_BEAST", end:"BEAST", family:"SET", phase:"L1" },
+  SET_APE_FROM_LB: { id:"SET_APE_FROM_LB", name:"Set Deep Ape", kind:"SET", start:"LOADED_BEAST", end:"APE", family:"SET", phase:"L1" },
+  FSTEP_LB: { id:"FSTEP_LB", name:"Front Step", kind:"ST", start:"LOADED_BEAST", end:"LOADED_BEAST", family:"FRONT", phase:"L1" },
+  FST_LB: { id:"FST_LB", name:"Front Step Through", kind:"ST", start:"LOADED_BEAST", end:"LOADED_BEAST", family:"FRONT", phase:"L1" },
+  FKT_LB: { id:"FKT_LB", name:"Front Kickthrough", kind:"ST", start:"LOADED_BEAST", end:"LOADED_BEAST", family:"FRONT", phase:"L1" },
+  US_LB2C: { id:"US_LB2C", name:"Underswitch", kind:"ST", start:"LOADED_BEAST", end:"CRAB", family:"US", phase:"L1" },
+  LBU_LB: { id:"LBU_LB", name:"Loaded Beast Unload", kind:"FSS", start:"LOADED_BEAST", end:"LOADED_BEAST", family:"FSS", phase:"L1" },
+  WU_LB: { id:"WU_LB", name:"Wave Unload", kind:"FSS", start:"LOADED_BEAST", end:"LOADED_BEAST", family:"FSS", phase:"L1" },
+  SR_LB: { id:"SR_LB", name:"Scorpion Reach", kind:"FSS", start:"LOADED_BEAST", end:"LOADED_BEAST", family:"FSS", phase:"L1" },
+  BR_LB: { id:"BR_LB", name:"Beast Reach", kind:"FSS", start:"LOADED_BEAST", end:"LOADED_BEAST", family:"FSS", phase:"L1" },
+
+  RUS_APE: { id:"RUS_APE", name:"Reaching Underswitch", kind:"ST", start:"APE", end:"CRAB", family:"L2_CORE", phase:"L2_CORE" },
+  SSWEEP_APE: { id:"SSWEEP_APE", name:"Scorpion Sweep", kind:"ST", start:"APE", end:"APE", family:"L2_CORE", phase:"L2_CORE" }
+};
+
+const AF_ALLOWED = {
+  APE: ["APE_REACH","SET_BEAST_FROM_APE","SET_CRAB_FROM_APE","SET_LB_FROM_APE","TF_APE_FWD","TF_APE_LAT1","TF_APE_LAT2","TF_APE_LAT3","RUS_APE","SSWEEP_APE"],
+  BEAST: ["SET_LB_FROM_BEAST","SET_APE_FROM_BEAST","US_B2C","UST_BEAST","SKT_BEAST","SS_B2C","SR_BEAST","TF_BEAST_FWD","TF_BEAST_REV","TF_BEAST_LAT","BEAR_BEAST","LEOPARD_BEAST"],
+  CRAB: ["SET_APE_FROM_CRAB","US_C2B","UST_CRAB","JUS_CRAB","FS_CRAB","CRAB_REACH","US_C2LB","TF_CRAB_FWD","TF_CRAB_REV","USA_CRAB","RT_CRAB","CROCR_CRAB","PO_CRAB","CROC_CRAWL_CRAB"],
+  LOADED_BEAST: ["SET_BEAST_FROM_LB","SET_APE_FROM_LB","FSTEP_LB","FST_LB","FKT_LB","US_LB2C","LBU_LB","WU_LB","SR_LB","BR_LB"]
+};
+
+function afChoice(rng, arr){ return arr[Math.floor(rng()*arr.length)]; }
+function afIsMoveEnabled(move, flags, includeL1TF){
+  if (move.phase === "L1_TF") return includeL1TF;
+  if (move.phase === "L2_ADV") return flags.advancedEnabled;
+  if (move.phase === "LOCO") return flags.locomotionEnabled;
+  return true;
+}
+function afGetAllowedFromBase(base, flags, includeL1TF){
+  return (AF_ALLOWED[base] || []).map(id => AF_MOVES[id]).filter(move => afIsMoveEnabled(move, flags, includeL1TF));
+}
+function afScoreMove(move, prevMove, stepIndex, history, flags){
+  let score = 1;
+  if (!prevMove){
+    if (move.kind === "SET") score -= 0.8;
+    if (move.kind === "FSS") score += 0.3;
+    return score;
+  }
+  if (move.id === prevMove.id) score -= 4;
+  if (move.family === prevMove.family) score -= 1.5;
+  if (move.kind === prevMove.kind && move.kind !== "SET") score -= 0.5;
+  if (stepIndex < 2 && move.kind === "SET") score -= 1.2;
+  if (prevMove.id === "CRAB_REACH" && ["US_C2B","UST_CRAB","JUS_CRAB","FS_CRAB","US_C2LB","USA_CRAB","RT_CRAB"].includes(move.id)) score += 1.2;
+  if (prevMove.id === "BR_LB" && move.id === "FSTEP_LB") score += 1.2;
+  if (prevMove.id === "FSTEP_LB" && move.id === "FST_LB") score += 1.4;
+  if (prevMove.id === "FST_LB" && move.id === "FKT_LB") score += 1.2;
+  if (prevMove.id === "RUS_APE" && ["CRAB_REACH","US_C2B","RT_CRAB","CROCR_CRAB","USA_CRAB"].includes(move.id)) score += 1.3;
+  if (prevMove.id === "USA_CRAB" && ["APE_REACH","RUS_APE","SSWEEP_APE","TF_APE_LAT1","TF_APE_LAT2","TF_APE_LAT3"].includes(move.id)) score += 1.4;
+  if (prevMove.id === "SSWEEP_APE" && ["RUS_APE","APE_REACH","SET_BEAST_FROM_APE","SET_LB_FROM_APE"].includes(move.id)) score += 1.2;
+  if (prevMove.id === "RT_CRAB" && ["CROCR_CRAB","CRAB_REACH","USA_CRAB","US_C2B"].includes(move.id)) score += 1.3;
+  if (prevMove.id === "CROCR_CRAB" && move.id === "PO_CRAB") score += 2.0;
+  if (prevMove.id === "PO_CRAB" && ["RUS_APE","APE_REACH","SSWEEP_APE"].includes(move.id)) score += 1.5;
+  if (flags.locomotionEnabled && move.phase === "LOCO") score += 0.6;
+  if (prevMove.phase === "LOCO" && move.phase === "LOCO") score -= 1.0;
+  const recent = history.slice(-2);
+  if (move.kind === "FSS" && recent.filter(x => x.kind === "FSS").length >= 2) score -= 1.8;
+  if (move.kind === "SET" && recent.filter(x => x.kind === "SET").length >= 1) score -= 1.4;
+  if (move.phase === "L2_ADV" && recent.filter(x => x.phase === "L2_ADV").length >= 1) score -= 1.8;
+  if (move.phase === "LOCO" && recent.filter(x => x.phase === "LOCO").length >= 1) score -= 1.2;
+  return score;
+}
+function afWeightedPick(rng, moves, prevMove, stepIndex, history, flags){
+  const weighted = moves.map(move => ({ move, weight: Math.max(0.1, afScoreMove(move, prevMove, stepIndex, history, flags)) }));
+  const total = weighted.reduce((sum, x) => sum + x.weight, 0);
+  let r = rng() * total;
+  for (const item of weighted){
+    r -= item.weight;
+    if (r <= 0) return item.move;
+  }
+  return weighted[weighted.length - 1].move;
+}
+function afGetReturnCandidates(fromBase, targetBase, flags, includeL1TF){
+  return afGetAllowedFromBase(fromBase, flags, includeL1TF).filter(move => move.end === targetBase);
+}
+function hasSideSpecificSteps(flow){
+  return !!(flow?.steps || []).some(step => !!step.side);
+}
+function scoreAnimalFlowSequence(flow){
+  if (!flow || !flow.steps || !flow.steps.length) return -999;
+  const playable = flow.steps.slice();
+  const counts = { ST:0, TF:0, FSS:0, SET:0, L2_ADV:0, LOCO:0 };
+  let repeatedFamilies = 0;
+  let repeatedKinds = 0;
+  let returnBonus = 0;
+
+  for (let i = 0; i < playable.length; i++){
+    const step = playable[i];
+    counts[step.kind] = (counts[step.kind] || 0) + 1;
+    if (step.phase === "L2_ADV") counts.L2_ADV++;
+    if (step.phase === "LOCO") counts.LOCO++;
+    if (step.isReturn) returnBonus += 2;
+
+    const prev = playable[i - 1];
+    if (!prev) continue;
+    if (prev.family === step.family) repeatedFamilies++;
+    if (prev.kind === step.kind) repeatedKinds++;
+  }
+
+  let score = 0;
+  score += counts.ST * 3.2;
+  score += counts.TF * 1.4;
+  score += counts.FSS * 0.6;
+  score -= counts.SET * 1.3;
+  score -= repeatedFamilies * 1.5;
+  score -= repeatedKinds * 0.8;
+  score += returnBonus;
+  if (counts.ST >= 3) score += 3;
+  if (counts.TF >= 1) score += 1;
+  if (counts.FSS >= 1) score += 0.8;
+  if (counts.SET > 1) score -= 2;
+  if (flow.startBase && flow.endBase === flow.startBase) score += 4;
+  if (counts.L2_ADV > 1) score -= 1.5;
+  if (counts.LOCO > 1) score -= 1;
+  return score;
+}
+function buildAnimalFlowSequence(seedKey, opts = {}){
+  const rng = mulberry32(hashStrToSeed(seedKey));
+  const includeL1TF = !!opts.includeTF;
+  const length = opts.length === "random" ? (8 + Math.floor(rng() * 3)) : Number(opts.length);
+  const startBase = opts.startBase === "random" ? afChoice(rng, ["CRAB","BEAST","LOADED_BEAST","APE"]) : opts.startBase;
+  const startSide = rng() < 0.5 ? "L" : "R";
+  const flags = { advancedEnabled: rng() < 0.15, locomotionEnabled: rng() < 0.25 };
+  let currentBase = startBase;
+  let prevMove = null;
+  const steps = [];
+
+  const middleCount = Math.max(0, length - 1);
+  for (let i = 0; i < middleCount; i++){
+    const allowed = afGetAllowedFromBase(currentBase, flags, includeL1TF);
+    const candidates = allowed.filter(move => {
+      if (move.id === prevMove?.id && allowed.length > 1) return false;
+      return afGetReturnCandidates(move.end, startBase, flags, includeL1TF).length > 0;
+    });
+    const pool = candidates.length ? candidates : allowed;
+    const chosen = afWeightedPick(rng, pool, prevMove, i + 1, steps, flags);
+    steps.push({ index:steps.length + 1, start:currentBase, moveId:chosen.id, name:chosen.name, kind:chosen.kind, end:chosen.end, family:chosen.family, phase:chosen.phase });
+    currentBase = chosen.end;
+    prevMove = chosen;
+  }
+
+  let returnCandidates = afGetReturnCandidates(currentBase, startBase, flags, includeL1TF);
+  if (!returnCandidates.length){
+    const safeFlags = { ...flags, advancedEnabled:false, locomotionEnabled:false };
+    returnCandidates = afGetReturnCandidates(currentBase, startBase, safeFlags, false);
+  }
+  if (!returnCandidates.length){
+    returnCandidates = [{
+      id:`SET_${startBase}_RECOVER`,
+      name:`Return to ${AF_BASE_LABEL[startBase]}`,
+      kind:"SET",
+      start:currentBase,
+      end:startBase,
+      family:"SET",
+      phase:"RECOVER"
+    }];
+  }
+  const finalMove = afWeightedPick(rng, returnCandidates, prevMove, steps.length, steps, flags);
+  steps.push({ index:steps.length + 1, start:currentBase, moveId:finalMove.id, name:finalMove.name, kind:finalMove.kind, end:finalMove.end, family:finalMove.family, phase:finalMove.phase, isReturn:true });
+
+  return {
+    seedKey,
+    startSide,
+    startBase,
+    startCue: `Set ${AF_BASE_LABEL[startBase]}`,
+    endBase: finalMove.end,
+    length,
+    includeTF: includeL1TF,
+    includeHB: !!opts.includeHB,
+    hbEnabled: !!opts.includeHB,
+    advancedEnabled: flags.advancedEnabled,
+    locomotionEnabled: flags.locomotionEnabled,
+    engine: "closed-loop",
+    steps
+  };
+}
+function generateBestAnimalFlowSequence(seedKey, opts = {}){
+  const tries = 7;
+  let best = null;
+  let bestScore = -Infinity;
+  for (let i = 0; i < tries; i++){
+    const candidateSeed = i === 0 ? seedKey : `${seedKey}|v${i}`;
+    const candidate = buildAnimalFlowSequence(candidateSeed, opts);
+    const score = scoreAnimalFlowSequence(candidate);
+    if (score > bestScore){
+      best = candidate;
+      bestScore = score;
+    }
+  }
+  return { ...best, qualityScore: bestScore };
 }
 /* ===========================
    Composer 2.0: Beam search
@@ -1299,6 +1525,7 @@ function resetRunner(full=true){
 }
 function getActiveFlow(){
   if (!currentFlow) return null;
+  if (!hasSideSpecificSteps(currentFlow)) return currentFlow;
   const mode = ui.sideMode?.value || "flow";
   if (mode !== "flow") return currentFlow;
   return (runner.side === currentFlow.startSide) ? currentFlow : mirrorFlow(currentFlow);
@@ -1401,17 +1628,10 @@ let currentFlow = null;
 function renderPills(flow){
   ui.pillLine.innerHTML = "";
   if (!flow) return;
-  const hb = flow.hbEnabled ? "HB: ON" : "HB: OFF";
-  ui.pillLine.innerHTML =
-    `<span><b>${flow.date}</b></span>
-     <span>•</span>
-     <span>Animal Flow <b>Pure</b></span>
-     <span>•</span>
-     <span>Start: <b>${flow.startSide}</b></span>
-     <span>•</span>
-     <span>Length: <b>${flow.steps?.length || 0}</b></span>
-     <span>•</span>
-     <span>${hb}</span>`;
+  const hb = flow.hbEnabled ? "HB" : null;
+  const baseInfo = flow.startBase ? `Start <b>${AF_BASE_LABEL[flow.startBase] || flow.startBase}</b>` : `Start <b>${flow.startSide}</b>`;
+  const loopInfo = `<b>${flow.steps?.length || 0}</b> moves`;
+  ui.pillLine.innerHTML = [baseInfo, loopInfo, hb].filter(Boolean).map(x=>`<span>${x}</span>`).join(`<span> </span>`);
 }
 
 function renderFlowList(flow){
@@ -1420,7 +1640,11 @@ function renderFlowList(flow){
 
   // Title (PURE flows don't have base/feature)
   if (flow.steps && flow.steps.length && !flow.base){
-    ui.flowTitle.textContent = `Animal Flow Pure — ${flow.steps.length} steps`;
+    if (flow.startBase){
+      ui.flowTitle.textContent = `Start in ${AF_BASE_LABEL[flow.startBase] || flow.startBase}`;
+    } else {
+      ui.flowTitle.textContent = `${flow.steps.length} moves`;
+    }
   } else {
     ui.flowTitle.textContent = `${BASE_LABEL[flow.base]} → ${MOVES[flow.feature]?.name || flow.feature}`;
   }
@@ -1436,7 +1660,7 @@ function renderFlowList(flow){
       el.style.background="rgba(123,220,255,.06)";
     }
 
-    const isLegacy = !!s.moveId;
+    const isLegacy = !!s.moveId && !!MOVES[s.moveId];
     const m = isLegacy ? MOVES[s.moveId] : null;
 
     const tags = [];
@@ -1444,9 +1668,10 @@ function renderFlowList(flow){
       tags.push(`<span class="tag">${m.type}</span>`);
       if (m.type !== "SET" && (m.tags||[]).length) tags.push(`<span class="tag">${m.tags[0]}</span>`);
     } else {
-      tags.push(`<span class="tag">PURE</span>`);
+      tags.push(`<span class="tag">${escapeHTML(s.phase || s.kind || "PURE")}</span>`);
       // If we have start/end shapes, show them as tiny hints
-      if (s.start && s.end) tags.push(`<span class="tag">${s.start}→${s.end}</span>`);
+      if (s.start && s.end) tags.push(`<span class="tag">${escapeHTML((AF_BASE_LABEL[s.start] || s.start) + "→" + (AF_BASE_LABEL[s.end] || s.end))}</span>`);
+      if (s.isReturn) tags.push(`<span class="tag">RETURN</span>`);
     }
 
     el.innerHTML = `
@@ -1479,11 +1704,12 @@ function renderHistory(){
   ui.historyBox.innerHTML = h.map(x=>{
     const hb = x.hbEnabled ? "HB ON" : "HB OFF";
     const n = (x.steps && x.steps.length) ? x.steps.length : 0;
+    const startTag = x.startBase ? `Base ${AF_BASE_LABEL[x.startBase] || x.startBase}` : `Start ${x.startSide}`;
     return `
       <div style="margin-bottom:8px">
         <span class="tag">${x.date}</span>
         <span class="tag">Pure</span>
-        <span class="tag">Start ${x.startSide}</span>
+        <span class="tag">${startTag}</span>
         <span class="tag">${n} steps</span>
         <span class="tag">${hb}</span>
       </div>`;
@@ -1510,19 +1736,31 @@ function renderRunner(){
   const flow = getActiveFlow();
   const step = flow.steps[runner.stepIndex];
   const call = safeStepLabel(step, runner.side);
+  const sideAware = hasSideSpecificSteps(flow);
+  const startCue = flow.startCue || (flow.startBase ? `Set ${AF_BASE_LABEL[flow.startBase] || flow.startBase}` : "");
 
   let guidance="";
   if (runner.mode==="pieces"){
     const reps=parseInt(ui.piecesReps.value,10);
-    guidance = ui.piecesBothSides.checked
-      ? `Do ${reps} reps on ${runner.side}, then mirror and do ${reps} reps on ${runner.side==="L"?"R":"L"}.`
-      : `Do ${reps} reps on ${runner.side}.`;
+    guidance = !sideAware
+      ? `${reps} reps per kant. Leer elke piece los en met controle.`
+      : ui.piecesBothSides.checked
+      ? `${reps} reps op ${runner.side}, daarna ${reps} op ${runner.side==="L"?"R":"L"}.`
+      : `${reps} reps op ${runner.side}.`;
   } else if (runner.mode==="linked"){
     const perSide=parseInt(ui.linkedFlows.value,10);
-    guidance=`Run full flow for ${perSide} flows per side.`;
+    guidance = sideAware
+      ? `${perSide} linked reps per kant met als doel de flow te leren kennen.`
+      : `${perSide} linked reps om de flow te leren kennen.`;
   } else {
-    const n=parseInt(ui.microBreakN.value,10);
-    guidance = n>0 ? `Keep quality. Micro-break suggestion every ${n} flows.` : "Keep quality. No micro-breaks.";
+    const mins=parseInt(ui.timedMinutes.value,10);
+    guidance = `Zo veel mogelijk kwalitatieve reps in ${mins} minuten.`;
+  }
+
+  if (runner.stepIndex === 0 && startCue){
+    guidance = `Start cue: ${startCue}.\n${guidance}`;
+  } else if (step?.isReturn && startCue){
+    guidance = `${guidance}\n\nAfter this step: ${startCue} and loop again.`;
   }
 
   ui.calloutBox.textContent = `${call}\n\n${guidance}`;
@@ -1552,7 +1790,7 @@ function setMode(tab){
   ui.modeTimed.style.display  = tab==="timed"  ? "" : "none";
   runner.mode = tab;
   runner.segment = tab==="pieces"?1:tab==="linked"?2:3;
-  ui.runnerTitle.textContent = tab==="pieces" ? "Pieces" : tab==="linked" ? "Linked" : "Timed";
+  ui.runnerTitle.textContent = tab==="pieces" ? "Pieces" : tab==="linked" ? "Linked" : "Flow";
   resetRunner(false);
   renderRunner();
   saveSession();
@@ -1641,7 +1879,13 @@ function generateToday({override=false}={}){
   const seedKey = override ? `${date}#${Date.now()}` : date;
   const rng = mulberry32(hashStrToSeed(seedKey));
   const drills = pickDailyDrills(rng, 4);
-  const flow = composePureFlow({seedKey, hbEnabled});
+  const flow = generateBestAnimalFlowSequence(seedKey, {
+    length: "random",
+    startBase: "random",
+    includeTF: false,
+    includeHB: hbEnabled
+  });
+  flow.date = date;
   flow.drills = drills;
 
   currentFlow=flow;
@@ -1800,3 +2044,10 @@ ui.btnClear.addEventListener("click", ()=>{
 </script>
 </body>
 </html>
+
+
+
+
+
+
+
