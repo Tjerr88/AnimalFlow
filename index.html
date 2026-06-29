@@ -28,6 +28,18 @@
     h1{margin:0;font-size:18px;letter-spacing:.2px}
     .sub{color:var(--muted);font-size:12.5px;line-height:1.35;margin-top:6px;max-width:54ch}
     .topActions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    .quickControls{
+      display:grid;
+      grid-template-columns:repeat(3, minmax(160px, 1fr));
+      gap:10px;
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      background:rgba(255,255,255,.025);
+      padding:10px 12px;
+    }
+    .controlField{display:flex;flex-direction:column;gap:6px}
+    .controlField label{color:var(--muted);font-size:12px}
+    @media (max-width: 560px){ .quickControls{grid-template-columns:1fr} }
     button{
       appearance:none; border:1px solid var(--border);
       background:transparent; color:var(--text);
@@ -192,6 +204,37 @@
     </div>
   </header>
 
+  <div class="quickControls">
+    <div class="controlField">
+      <label>Practice Mode</label>
+      <select id="practiceMode">
+        <option value="l1_foundation" selected>L1 Foundation</option>
+        <option value="l1_complete">L1 + Traveling</option>
+        <option value="l1_testout">L1 Test-Out Prep</option>
+        <option value="l2_core">L2 Core</option>
+        <option value="l2_kinetic">L2 Kinetic</option>
+        <option value="l2_testout">L2 Test-Out Prep</option>
+      </select>
+    </div>
+    <div class="controlField">
+      <label>Flow Feel</label>
+      <select id="flowProfile">
+        <option value="balanced" selected>Balanced</option>
+        <option value="technical">Technical</option>
+        <option value="kinetic">Kinetic</option>
+        <option value="conditioning">Conditioning</option>
+      </select>
+    </div>
+    <div class="controlField">
+      <label>Progression</label>
+      <select id="progressionLevel">
+        <option value="basics" selected>Basics</option>
+        <option value="dynamic">Dynamic</option>
+        <option value="advanced">Advanced</option>
+      </select>
+    </div>
+  </div>
+
   <div class="grid">
     <section class="card">
       <div class="hd">
@@ -214,8 +257,8 @@
         <div class="bbody">
           <ul class="checklist">
             <li><span class="dot"></span> 3–5 sets: Tuck Balance attempts (quality holds, stop before shaking)</li>
-            <li><span class="dot"></span> OR 3–5 sets: Crow / Frog stand 10–20s</li>
-            <li><span class="dot"></span> OR Toe-tap / box-assisted balance progressions</li>
+            <li><span class="dot"></span> OR 3–5 sets: Wall-assisted Tuck Balance</li>
+            <li><span class="dot"></span> OR Hand Balancing Preparation Drills</li>
             <li><span class="dot"></span> Rest 45–90s between attempts</li>
           </ul>
           <div class="note">Tip: keep this block <b>out</b> of Segment 3 (timed) to avoid fatigue-based breakdown.</div>
@@ -239,13 +282,13 @@
               <ul class="checklist">
                 <li><span class="dot"></span> Wrist rocks (forward/back)</li>
                 <li><span class="dot"></span> Side-to-side + circles</li>
-                <li><span class="dot"></span> Light pulses (pain-free range)</li>
+                <li><span class="dot"></span> Wrist Relief (pain-free range)</li>
               </ul>
 
               <div class="sectionTitle">B) Activations</div>
               <ul class="checklist">
-                <li><span class="dot"></span> Beast hold 20–30s</li>
-                <li><span class="dot"></span> Crab hold 20–30s</li>
+                <li><span class="dot"></span> Static Beast 20–30s</li>
+                <li><span class="dot"></span> Static Crab 20–30s</li>
               </ul>
             </div>
 
@@ -257,16 +300,16 @@
 
               <div class="sectionTitle">D) Traveling Forms</div>
               <ul class="checklist">
-                <li><span class="dot"></span> Ape forward/back (1–2 reps per side)</li>
-                <li><span class="dot"></span> Beast lateral (1–2 reps per side)</li>
-                <li><span class="dot"></span> Crab reach step (1–2 reps per side)</li>
+                <li><span class="dot"></span> Forward Traveling Ape (1–2 reps)</li>
+                <li><span class="dot"></span> Lateral Traveling Beast (1–2 reps per side)</li>
+                <li><span class="dot"></span> Crab Reach (1–2 reps per side)</li>
               </ul>
 
               <div class="sectionTitle">E) Switches &amp; Transitions primer</div>
               <ul class="checklist">
                 <li><span class="dot"></span> 1 Underswitch (each side)</li>
                 <li><span class="dot"></span> 1 Side Kickthrough (each side)</li>
-                <li><span class="dot"></span> 1 Scorpion (each side)</li>
+                <li><span class="dot"></span> 1 Scorpion Switch (each side)</li>
                 <li><span class="dot"></span> 1 Front Kickthrough (each side)</li>
               </ul>
             </div>
@@ -288,6 +331,8 @@
       <div class="hr"></div>
 
         <div class="flowlist" id="flowList"></div>
+        <div class="callout" id="writtenFlow" style="margin-top:10px;display:none"></div>
+        <div class="callout" id="validationBox" style="margin-top:10px;display:none"></div>
 
         <div class="hr"></div>
 
@@ -340,7 +385,7 @@
             <div class="sumrow">
               <div>
                 <div class="k">Cool-down</div>
-                <div class="hint">Reset wrists + easy breathing (1–3 min)</div>
+              <div class="hint">Wrist Mobilizations (1–3 min)</div>
               </div>
               <div class="badge">1–3 min</div>
             </div>
@@ -348,8 +393,8 @@
           <div class="bbody">
             <ul class="checklist">
               <li><span class="dot"></span> Wrist mobs (gentle) 30–60s</li>
-              <li><span class="dot"></span> Child’s pose breathing 5 slow breaths</li>
-              <li><span class="dot"></span> Optional: supine breathing 5 slow breaths</li>
+              <li><span class="dot"></span> Wrist Waves 30–60s</li>
+              <li><span class="dot"></span> Wrist Relief 30–60s</li>
             </ul>
           </div>
         </details>
@@ -394,6 +439,14 @@
           <button class="primary" id="btnNext">Next</button>
           <button id="btnRep">Rep +1</button>
         </div>
+        <div class="hr"></div>
+
+        <div class="row">
+          <button id="btnCopyCallout">Copy Call-Out</button>
+          <button id="btnCopyWritten">Copy Written</button>
+          <button id="btnCopyPlan">Copy Plan</button>
+          <button class="good" id="btnFinish">Finish Session</button>
+        </div>
 
         <div class="hr"></div>
 
@@ -422,9 +475,23 @@
               </div>
             </details>
 
+            <details style="margin-top:10px">
+              <summary>Coverage</summary>
+              <div class="detailsBody">
+                <div class="hint" id="coverageBox">—</div>
+              </div>
+            </details>
+
+            <details style="margin-top:10px">
+              <summary>Session Log</summary>
+              <div class="detailsBody">
+                <div class="hint" id="sessionLogBox">—</div>
+              </div>
+            </details>
+
             <div class="hr"></div>
             <div class="hint">
-              Composer 2.0 is enabled (hidden daily style rotation for variety: creative/athletic/technical/grounded). UI stays clean.
+              Modes keep the movement library aligned with L1/L2 progressions; L2 Kinetic is the broadest option.
             </div>
           </div>
         </details>
@@ -442,6 +509,8 @@ const LS = {
   TODAY:   "afdg_today_v3",
   SESSION: "afdg_session_v3",
   SETTINGS:"afdg_settings_v3",
+  COVERAGE:"afdg_coverage_v1",
+  LOG:"afdg_session_log_v1",
 };
 
 /* ===========================
@@ -610,6 +679,10 @@ function setSettings(s){ localStorage.setItem(LS.SETTINGS, JSON.stringify(s)); }
 function getTodayFlow(){ try{ return JSON.parse(localStorage.getItem(LS.TODAY) || "null"); }catch(e){ return null; } }
 function setTodayFlow(flow){ localStorage.setItem(LS.TODAY, JSON.stringify(flow)); }
 function loadSession(){ try{ return JSON.parse(localStorage.getItem(LS.SESSION) || "null"); }catch(e){ return null; } }
+function getCoverage(){ try{ return JSON.parse(localStorage.getItem(LS.COVERAGE) || "{}"); }catch(e){ return {}; } }
+function setCoverage(x){ localStorage.setItem(LS.COVERAGE, JSON.stringify(x)); }
+function getSessionLog(){ try{ return JSON.parse(localStorage.getItem(LS.LOG) || "[]"); }catch(e){ return []; } }
+function setSessionLog(x){ localStorage.setItem(LS.LOG, JSON.stringify(x.slice(0,30))); }
 
 function saveSession(){
   const pack = {
@@ -622,6 +695,10 @@ function saveSession(){
       linkedFlows: ui.linkedFlows.value,
       timedMinutes: ui.timedMinutes.value,
       microBreakN: ui.microBreakN?.value ?? "0",
+      practiceMode: ui.practiceMode?.value ?? "l1_foundation",
+      flowProfile: ui.flowProfile?.value ?? "balanced",
+      progressionLevel: ui.progressionLevel?.value ?? "basics",
+      hbOn: ui.hbOn?.checked ?? false,
 }
   };
   try{ localStorage.setItem(LS.SESSION, JSON.stringify(pack)); }catch(e){}
@@ -893,6 +970,9 @@ function formatPureName(rawName, sideType, side){
 }
 
 function safeStepLabel(step, fallbackSide="L"){
+  if (step && step.moveId && AF_MOVES[step.moveId]){
+    return afFormatCallOut(step, fallbackSide);
+  }
   // For legacy/scored flows: step.moveId exists.
   if (step && step.moveId && MOVES[step.moveId]){
     return makeCallOut(step.moveId, step.side || fallbackSide);
@@ -969,20 +1049,366 @@ const AF_ALLOWED = {
 };
 
 function afChoice(rng, arr){ return arr[Math.floor(rng()*arr.length)]; }
-function afIsMoveEnabled(move, flags, includeL1TF){
-  if (move.phase === "L1_TF") return includeL1TF;
-  if (move.phase === "L2_ADV") return flags.advancedEnabled;
-  if (move.phase === "LOCO") return flags.locomotionEnabled;
-  return true;
+
+const AF_MODE = {
+  l1_foundation: {
+    label:"L1 Foundation",
+    includeTF:false,
+    allowL2:false,
+    allowLocomotion:false,
+    allowAdvanced:false,
+    length:[7,9],
+    startBases:["CRAB","BEAST","LOADED_BEAST","APE"]
+  },
+  l1_complete: {
+    label:"L1 + Traveling",
+    includeTF:true,
+    allowL2:false,
+    allowLocomotion:false,
+    allowAdvanced:false,
+    testOut:false,
+    length:[8,10],
+    startBases:["CRAB","BEAST","LOADED_BEAST","APE"]
+  },
+  l1_testout: {
+    label:"L1 Test-Out Prep",
+    includeTF:true,
+    allowL2:false,
+    allowLocomotion:false,
+    allowAdvanced:false,
+    testOut:"L1",
+    requiredFamilies:["US","UST","SKT","SCORPION","FRONT","FSS","TF"],
+    length:[12,14],
+    startBases:["CRAB","BEAST","LOADED_BEAST","APE"]
+  },
+  l2_core: {
+    label:"L2 Core",
+    includeTF:true,
+    allowL2:true,
+    allowLocomotion:false,
+    allowAdvanced:false,
+    testOut:false,
+    length:[9,11],
+    startBases:["CRAB","BEAST","LOADED_BEAST","APE"]
+  },
+  l2_kinetic: {
+    label:"L2 Kinetic",
+    includeTF:true,
+    allowL2:true,
+    allowLocomotion:true,
+    allowAdvanced:true,
+    testOut:false,
+    length:[10,12],
+    startBases:["CRAB","BEAST","LOADED_BEAST","APE"]
+  },
+  l2_testout: {
+    label:"L2 Test-Out Prep",
+    includeTF:true,
+    allowL2:true,
+    allowLocomotion:true,
+    allowAdvanced:true,
+    testOut:"L2",
+    requiredFamilies:["L2_CORE","LOCO","ADV","FSS","TF","US","SCORPION"],
+    length:[13,15],
+    startBases:["CRAB","BEAST","LOADED_BEAST","APE"]
+  }
+};
+
+const AF_PROFILE = {
+  balanced: { label:"Balanced", st:1.0, tf:1.0, fss:1.0, set:1.0, l2:1.0 },
+  technical: { label:"Technical", st:0.9, tf:0.8, fss:1.45, set:1.25, l2:0.9 },
+  kinetic: { label:"Kinetic", st:1.2, tf:1.15, fss:0.75, set:1.15, l2:1.25 },
+  conditioning: { label:"Conditioning", st:1.0, tf:1.65, fss:0.8, set:1.0, l2:1.0 }
+};
+
+function getPracticeConfig(opts = {}){
+  const modeKey = opts.practiceMode || ui?.practiceMode?.value || "l1_foundation";
+  const profileKey = opts.flowProfile || ui?.flowProfile?.value || "balanced";
+  const progressionKey = opts.progressionLevel || ui?.progressionLevel?.value || "basics";
+  const mode = AF_MODE[modeKey] || AF_MODE.l1_foundation;
+  const profile = AF_PROFILE[profileKey] || AF_PROFILE.balanced;
+  return { ...mode, modeKey, profileKey, progressionKey, profile };
 }
-function afGetAllowedFromBase(base, flags, includeL1TF){
-  return (AF_ALLOWED[base] || []).map(id => AF_MOVES[id]).filter(move => afIsMoveEnabled(move, flags, includeL1TF));
+
+function afIsMoveEnabled(move, config){
+  if (!move) return false;
+  if (!config.testOut && config.progressionKey === "basics" && ["JUS_CRAB","CROCR_CRAB","PO_CRAB","BEAR_BEAST","LEOPARD_BEAST","CROC_CRAWL_CRAB"].includes(move.id)) return false;
+  if (!config.testOut && config.progressionKey === "dynamic" && ["CROCR_CRAB","PO_CRAB"].includes(move.id)) return false;
+  if (move.phase === "L1_TF") return config.includeTF;
+  if (move.phase === "L2_CORE") return config.allowL2;
+  if (move.phase === "L2_ADV") return config.allowAdvanced;
+  if (move.phase === "LOCO") return config.allowLocomotion;
+  return move.phase === "L1";
 }
-function afScoreMove(move, prevMove, stepIndex, history, flags){
+function afGetAllowedFromBase(base, config){
+  return (AF_ALLOWED[base] || []).map(id => AF_MOVES[id]).filter(move => afIsMoveEnabled(move, config));
+}
+function afMoveSideType(move){
+  if (!move || move.kind === "SET" || move.kind === "TF") return null;
+  if (["CRAB_REACH","BR_LB"].includes(move.id)) return "Arm";
+  if (["CROCR_CRAB","PO_CRAB"].includes(move.id)) return "Side";
+  if (["APE_REACH","LBU_LB","WU_LB"].includes(move.id)) return null;
+  return "Leg";
+}
+function afFormatCallOut(step, fallbackSide="L"){
+  if (!step) return "—";
+  if (step.kind === "SET" || step.kind === "TF" || !step.side) return step.name || "—";
+  const dir = step.side === "R" ? "Right" : "Left";
+  const limb = step.sideType || "Leg";
+  return `${dir} ${limb} ${step.name}`;
+}
+function afBaseName(base){
+  return AF_BASE_LABEL[base] || base || "Base";
+}
+function afIsFSS(step){
+  return step?.kind === "FSS";
+}
+function afIsFrontStepReturn(step){
+  return ["FSTEP_LB","FST_LB"].includes(step?.moveId);
+}
+function afIsFrontKickthrough(step){
+  return step?.moveId === "FKT_LB";
+}
+function afNeedsToInto(step){
+  return ["RUS_APE","PO_CRAB"].includes(step?.moveId);
+}
+function afTransitionCommand(prev, step, next){
+  if (!step) return "";
+  if (afIsFSS(step)) return `Return to ${afBaseName(step.end)}`;
+  if (afIsFrontStepReturn(step)) return `Return to ${afBaseName(step.end)}`;
+  if (afIsFrontKickthrough(step)) return `Pop Back to ${afBaseName(step.end)}`;
+  if (step.moveId === "RT_CRAB") return `TO ${afBaseName(step.end)}`;
+  if (prev && afNeedsToInto(step)) return "TO";
+  return "";
+}
+function afFormatManualCallOut(steps, index, fallbackSide="L"){
+  const step = steps?.[index];
+  if (!step) return "—";
+  const base = afFormatCallOut(step, fallbackSide);
+  const transition = afTransitionCommand(steps[index - 1], step, steps[index + 1]);
+  if (!transition) return base;
+  if (transition === "TO" || transition === "INTO") return `${transition} ${base}`;
+  return `${base} - ${transition}`;
+}
+function afWrittenToken(step, fallbackSide="L"){
+  const abbr = {
+    SET_BEAST_FROM_APE:"Beast", SET_CRAB_FROM_APE:"Crab", SET_LB_FROM_APE:"Loaded Beast",
+    SET_LB_FROM_BEAST:"Loaded Beast", SET_APE_FROM_BEAST:"Ape", SET_APE_FROM_CRAB:"Ape",
+    SET_BEAST_FROM_LB:"Beast", SET_APE_FROM_LB:"Ape",
+    APE_REACH:"AR", CRAB_REACH:"CR", SR_BEAST:"SR", LBU_LB:"LBU", WU_LB:"WU", SR_LB:"SR", BR_LB:"BR",
+    US_B2C:"US", UST_BEAST:"USTap", SKT_BEAST:"SKT", SS_B2C:"SS",
+    US_C2B:"US", UST_CRAB:"USTap", JUS_CRAB:"JUS", FS_CRAB:"FS", US_C2LB:"US-LB",
+    FSTEP_LB:"FStep", FST_LB:"FST", FKT_LB:"FKT", US_LB2C:"US",
+    RUS_APE:"RUS", SSWEEP_APE:"SSweep", USA_CRAB:"US-A", RT_CRAB:"RT", CROCR_CRAB:"CrocR", PO_CRAB:"PO",
+    TF_APE_FWD:"FTA", TF_APE_LAT1:"LTA1", TF_APE_LAT2:"LTA2", TF_APE_LAT3:"LTA3",
+    TF_BEAST_FWD:"FTB", TF_BEAST_REV:"RTB", TF_BEAST_LAT:"LTB",
+    TF_CRAB_FWD:"FTC", TF_CRAB_REV:"RTC", BEAR_BEAST:"FTBr", LEOPARD_BEAST:"FTL", CROC_CRAWL_CRAB:"CC"
+  };
+  if (!step) return "";
+  if (step.kind === "SET") return abbr[step.moveId] || afBaseName(step.end);
+  const side = step.side || fallbackSide;
+  const dir = side === "R" ? "R" : "L";
+  const limb = step.sideType === "Arm" ? "A" : step.sideType === "Side" ? "Sd" : step.sideType === "Leg" ? "L" : "";
+  const prefix = limb ? `${dir} ${limb} ` : "";
+  return `${prefix}${abbr[step.moveId] || step.name}`;
+}
+function afWrittenFlow(flow){
+  if (!flow?.steps?.length) return "";
+  const start = afBaseName(flow.startBase);
+  const parts = flow.steps.map((step, i)=>{
+    const token = afWrittenToken(step, flow.startSide);
+    const transition = afTransitionCommand(flow.steps[i - 1], step, flow.steps[i + 1]);
+    if (!transition) return token;
+    if (afIsFrontKickthrough(step)) return `${token} - PB Loaded Beast`;
+    if (transition === "TO" || transition === "INTO" || transition.startsWith("TO ")) return `- ${token}`;
+    return `${token} - ${afBaseName(step.end)}`;
+  });
+  return [start].concat(parts).join(", ");
+}
+const AF_CUES = {
+  US_B2C:["Move through the window cleanly; keep the base hand rooted.","Finish in the next base before rushing the next call."],
+  US_C2B:["Keep the transition low and controlled.","Avoid collapsing into the shoulder as you rotate."],
+  US_LB2C:["Open the movement window first, then travel through it.","Land softly in Crab."],
+  US_C2LB:["Use the call-out leg to guide the route into Loaded Beast.","Do not turn it into a loose Set command."],
+  UST_BEAST:["Tap with control; keep Beast stable.","Avoid shifting the hips high."],
+  UST_CRAB:["Keep Crab active while tapping.","Do not let the supporting arm bend."],
+  SKT_BEAST:["Kick through a clear window and keep the base shoulder strong.","Do not force range by twisting the low back."],
+  JUS_CRAB:["Use the jump as the transition, not as a separate hop.","Land with control before continuing."],
+  SS_B2C:["Travel over the window into Crab with a clean arc.","Avoid dropping weight into the shoulder."],
+  FS_CRAB:["Find the Modified Crab shape before moving on.","Keep the extended leg active."],
+  FSTEP_LB:["Step forward from Loaded Beast, then return on the same path.","Keep hands grounded and shoulders organised."],
+  FST_LB:["Thread through with control, then return to Loaded Beast.","Do not rush the return path."],
+  FKT_LB:["Use Pop Back when returning explosively to Loaded Beast.","Keep the kickthrough line clean."],
+  CRAB_REACH:["Lift through 3-point bridge before reaching.","Look toward the base hand in the reach."],
+  BR_LB:["Move out of Loaded Beast with strength through motion.","Keep the return path clear."],
+  SR_BEAST:["Reach through the line without dumping into the low back.","Keep the base position active."],
+  SR_LB:["Use the leg reach without losing Loaded Beast tension.","Return with control."],
+  WU_LB:["Wave from Loaded Beast through spine flexion and extension.","Keep elbows straight."],
+  LBU_LB:["Unload from Loaded Beast without jumping the feet back.","Close the shoulder gap."],
+  APE_REACH:["Reach from Deep Ape, then return with control.","Keep the heels and hip position honest."],
+  RUS_APE:["Use the reach to create a cleaner Underswitch path.","Finish in Crab before the next command."],
+  USA_CRAB:["Use Underswitch to Deep Ape instead of a Set when flowing from Crab.","Land in Ape with control."],
+  SSWEEP_APE:["Sweep with a clear rotational line.","Do not let the movement become a random spin."],
+  RT_CRAB:["Roll through and return to the intended base path.","Keep momentum smooth, not collapsed."],
+  CROCR_CRAB:["Use Side in the call-out and keep the roll controlled.","Do not lose the closed-side relationship."],
+  PO_CRAB:["Pop Out from the Crocodile relationship.","Land in Ape with active control."],
+  TF_BEAST_FWD:["Use opposite hand and foot together.","Keep knees close to the floor."],
+  TF_BEAST_REV:["Travel backward with equal hand and foot distance.","Avoid over-striding."],
+  TF_BEAST_LAT:["Open and close the Beast shape cleanly.","Keep hands and feet organised."],
+  TF_CRAB_FWD:["Lift opposite hand and foot together.","Keep hips low and shoulders active."],
+  TF_CRAB_REV:["Travel in Crab without over-lifting the hips.","Keep the landing pattern clear."],
+  TF_APE_FWD:["Dive forward from Ape without planting and pulling.","Keep hips low."],
+  TF_APE_LAT1:["Use the Low Hip version with clean cross-body contact.","Lift the chest into the new Ape."],
+  TF_APE_LAT2:["Stack the hips higher with control.","Do not kick the legs wildly behind you."],
+  TF_APE_LAT3:["Reach fluidly and avoid pausing in Ape.","Keep the trail foot from sliding in casually."],
+  BEAR_BEAST:["Use a contralateral travel rhythm.","Keep the stride deliberate."],
+  LEOPARD_BEAST:["Stay low and controlled through the travel.","Avoid speed over clarity."],
+  CROC_CRAWL_CRAB:["Keep the crawl tight and purposeful.","Do not let the shoulder collapse."]
+};
+function afStepCues(step){
+  return AF_CUES[step?.moveId] || ["Move with control and keep the base shape active."];
+}
+function afFullCallOut(flow){
+  if (!flow?.steps?.length) return "";
+  return [`Set ${afBaseName(flow.startBase)}`].concat(flow.steps.map((_, i)=>afFormatManualCallOut(flow.steps, i, flow.startSide))).join(", ");
+}
+function afPracticePlan(flow){
+  if (!flow) return "";
+  const validation = flow.validation || afValidateFlow(flow);
+  return [
+    `Animal Flow Practice - ${flow.practiceLabel || "Flow"}`,
+    `Score: ${validation.grade} (${validation.score}/100)`,
+    "",
+    "Call-Out:",
+    afFullCallOut(flow),
+    "",
+    "Written Flow:",
+    afWrittenFlow(flow),
+    "",
+    "Focus:",
+    validation.wins.join(", ") || "Clean structure",
+    validation.issues.length ? `Watch: ${validation.issues.join(" ")}` : "Watch: keep technique clean."
+  ].join("\n");
+}
+async function copyText(text){
+  try{
+    await navigator.clipboard.writeText(text);
+    beep(900,50);
+  }catch(e){
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.setAttribute("readonly", "");
+    ta.style.position = "fixed";
+    ta.style.left = "-9999px";
+    document.body.appendChild(ta);
+    ta.select();
+    try{ document.execCommand("copy"); beep(900,50); }catch(err){}
+    document.body.removeChild(ta);
+  }
+}
+function afFlowMetrics(flow){
+  const steps = flow?.steps || [];
+  const families = new Set(steps.map(s => s.family));
+  const phases = new Set(steps.map(s => s.phase));
+  const kinds = new Set(steps.map(s => s.kind));
+  return {
+    steps: steps.length,
+    families,
+    phases,
+    kinds,
+    st: steps.filter(s => s.kind === "ST").length,
+    tf: steps.filter(s => s.kind === "TF").length,
+    fss: steps.filter(s => s.kind === "FSS").length,
+    set: steps.filter(s => s.kind === "SET").length,
+    l2: steps.filter(s => s.phase === "L2_CORE" || s.phase === "L2_ADV" || s.phase === "LOCO").length,
+  };
+}
+function afValidateFlow(flow){
+  const issues = [];
+  const wins = [];
+  if (!flow?.steps?.length) return { score:0, grade:"Needs work", issues:["No flow generated."], wins:[] };
+
+  const config = AF_MODE[flow.practiceMode] || AF_MODE.l1_foundation;
+  const allowed = new Set(["L1"]);
+  if (config.includeTF) allowed.add("L1_TF");
+  if (config.allowL2) allowed.add("L2_CORE");
+  if (config.allowAdvanced) allowed.add("L2_ADV");
+  if (config.allowLocomotion) allowed.add("LOCO");
+
+  let score = 100;
+  const metrics = afFlowMetrics(flow);
+
+  flow.steps.forEach((step, i) => {
+    if (!allowed.has(step.phase)){
+      issues.push(`${step.name} is outside ${config.label}.`);
+      score -= 20;
+    }
+    if (i > 0 && step.start !== flow.steps[i - 1].end){
+      issues.push(`Base continuity break before ${step.name}.`);
+      score -= 30;
+    }
+    if ((afIsFSS(step) || afIsFrontStepReturn(step) || afIsFrontKickthrough(step)) && !afTransitionCommand(flow.steps[i - 1], step, flow.steps[i + 1])){
+      issues.push(`${step.name} needs an explicit return/pop command.`);
+      score -= 12;
+    }
+  });
+
+  if (flow.steps[flow.steps.length - 1].end !== flow.startBase){
+    issues.push("Flow does not close back to the starting base.");
+    score -= 30;
+  } else {
+    wins.push("Closed loop");
+  }
+
+  if (metrics.st >= 3) wins.push("S&T density");
+  else { issues.push("Add more Switches & Transitions."); score -= 8; }
+
+  if (metrics.fss >= 1) wins.push("FSS included");
+  else { issues.push("Add at least one FSS."); score -= 8; }
+
+  if (config.includeTF){
+    if (metrics.tf >= 1) wins.push("Traveling included");
+    else { issues.push("Traveling Form missing for this mode."); score -= 8; }
+  }
+
+  (config.requiredFamilies || []).forEach(family => {
+    if (!metrics.families.has(family)){
+      issues.push(`${family} family missing.`);
+      score -= 12;
+    }
+  });
+
+  if (config.testOut === "L2"){
+    if (!metrics.phases.has("L2_CORE")) { issues.push("L2 core movement missing."); score -= 10; }
+    if (!metrics.phases.has("LOCO")) { issues.push("L2 locomotion missing."); score -= 10; }
+    if (!metrics.phases.has("L2_ADV")) { issues.push("L2 advanced movement missing."); score -= 10; }
+  }
+
+  if (metrics.set > Math.ceil(metrics.steps / 4)){
+    issues.push("Too many Set commands; flow may feel mechanical.");
+    score -= 8;
+  }
+
+  score = clamp(Math.round(score), 0, 100);
+  const grade = score >= 90 ? "Strong" : score >= 75 ? "Solid" : score >= 60 ? "Practice" : "Needs work";
+  return { score, grade, issues: issues.slice(0, 5), wins: wins.slice(0, 5), metrics };
+}
+function afChooseSide(rng, move, prevStep, startSide){
+  if (!afMoveSideType(move)) return null;
+  if (!prevStep?.side) return startSide || (rng() < 0.5 ? "L" : "R");
+  if (prevStep.name === move.name && rng() < 0.85) return prevStep.side === "L" ? "R" : "L";
+  if (rng() < 0.62) return prevStep.side === "L" ? "R" : "L";
+  return prevStep.side;
+}
+function afScoreMove(move, prevMove, stepIndex, history, config){
   let score = 1;
+  const profile = config.profile || AF_PROFILE.balanced;
+  const seenFamilies = new Set(history.map(x => x.family));
+  const missingRequired = (config.requiredFamilies || []).filter(family => !seenFamilies.has(family));
+  if (missingRequired.includes(move.family)) score += config.testOut ? 4.5 : 1.5;
   if (!prevMove){
-    if (move.kind === "SET") score -= 0.8;
-    if (move.kind === "FSS") score += 0.3;
+    if (move.kind === "SET") score -= 0.8 * profile.set;
+    if (move.kind === "FSS") score += 0.3 * profile.fss;
     return score;
   }
   if (move.id === prevMove.id) score -= 4;
@@ -999,7 +1425,13 @@ function afScoreMove(move, prevMove, stepIndex, history, flags){
   if (prevMove.id === "RT_CRAB" && ["CROCR_CRAB","CRAB_REACH","USA_CRAB","US_C2B"].includes(move.id)) score += 1.3;
   if (prevMove.id === "CROCR_CRAB" && move.id === "PO_CRAB") score += 2.0;
   if (prevMove.id === "PO_CRAB" && ["RUS_APE","APE_REACH","SSWEEP_APE"].includes(move.id)) score += 1.5;
-  if (flags.locomotionEnabled && move.phase === "LOCO") score += 0.6;
+  if (config.allowLocomotion && move.phase === "LOCO") score += 0.6 * profile.tf;
+  if (move.phase === "L2_CORE") score += 0.35 * profile.l2;
+  if (move.phase === "L2_ADV") score += 0.2 * profile.l2;
+  if (move.kind === "TF") score *= profile.tf;
+  if (move.kind === "FSS") score *= profile.fss;
+  if (move.kind === "ST") score *= profile.st;
+  if (move.kind === "SET") score /= profile.set;
   if (prevMove.phase === "LOCO" && move.phase === "LOCO") score -= 1.0;
   const recent = history.slice(-2);
   if (move.kind === "FSS" && recent.filter(x => x.kind === "FSS").length >= 2) score -= 1.8;
@@ -1008,8 +1440,8 @@ function afScoreMove(move, prevMove, stepIndex, history, flags){
   if (move.phase === "LOCO" && recent.filter(x => x.phase === "LOCO").length >= 1) score -= 1.2;
   return score;
 }
-function afWeightedPick(rng, moves, prevMove, stepIndex, history, flags){
-  const weighted = moves.map(move => ({ move, weight: Math.max(0.1, afScoreMove(move, prevMove, stepIndex, history, flags)) }));
+function afWeightedPick(rng, moves, prevMove, stepIndex, history, config){
+  const weighted = moves.map(move => ({ move, weight: Math.max(0.1, afScoreMove(move, prevMove, stepIndex, history, config)) }));
   const total = weighted.reduce((sum, x) => sum + x.weight, 0);
   let r = rng() * total;
   for (const item of weighted){
@@ -1018,8 +1450,8 @@ function afWeightedPick(rng, moves, prevMove, stepIndex, history, flags){
   }
   return weighted[weighted.length - 1].move;
 }
-function afGetReturnCandidates(fromBase, targetBase, flags, includeL1TF){
-  return afGetAllowedFromBase(fromBase, flags, includeL1TF).filter(move => move.end === targetBase);
+function afGetReturnCandidates(fromBase, targetBase, config){
+  return afGetAllowedFromBase(fromBase, config).filter(move => move.end === targetBase);
 }
 function hasSideSpecificSteps(flow){
   return !!(flow?.steps || []).some(step => !!step.side);
@@ -1060,37 +1492,52 @@ function scoreAnimalFlowSequence(flow){
   if (flow.startBase && flow.endBase === flow.startBase) score += 4;
   if (counts.L2_ADV > 1) score -= 1.5;
   if (counts.LOCO > 1) score -= 1;
+  const validation = afValidateFlow(flow);
+  score += validation.score * 0.35;
+  if (validation.issues.length) score -= validation.issues.length * 2;
   return score;
 }
 function buildAnimalFlowSequence(seedKey, opts = {}){
   const rng = mulberry32(hashStrToSeed(seedKey));
-  const includeL1TF = !!opts.includeTF;
-  const length = opts.length === "random" ? (8 + Math.floor(rng() * 3)) : Number(opts.length);
-  const startBase = opts.startBase === "random" ? afChoice(rng, ["CRAB","BEAST","LOADED_BEAST","APE"]) : opts.startBase;
+  const config = getPracticeConfig(opts);
+  const length = opts.length === "random"
+    ? (config.length[0] + Math.floor(rng() * (config.length[1] - config.length[0] + 1)))
+    : Number(opts.length);
+  const startBase = opts.startBase === "random" ? afChoice(rng, config.startBases) : opts.startBase;
   const startSide = rng() < 0.5 ? "L" : "R";
-  const flags = { advancedEnabled: rng() < 0.15, locomotionEnabled: rng() < 0.25 };
   let currentBase = startBase;
   let prevMove = null;
   const steps = [];
 
   const middleCount = Math.max(0, length - 1);
   for (let i = 0; i < middleCount; i++){
-    const allowed = afGetAllowedFromBase(currentBase, flags, includeL1TF);
+    const allowed = afGetAllowedFromBase(currentBase, config);
     const candidates = allowed.filter(move => {
       if (move.id === prevMove?.id && allowed.length > 1) return false;
-      return afGetReturnCandidates(move.end, startBase, flags, includeL1TF).length > 0;
+      return afGetReturnCandidates(move.end, startBase, config).length > 0;
     });
-    const pool = candidates.length ? candidates : allowed;
-    const chosen = afWeightedPick(rng, pool, prevMove, i + 1, steps, flags);
-    steps.push({ index:steps.length + 1, start:currentBase, moveId:chosen.id, name:chosen.name, kind:chosen.kind, end:chosen.end, family:chosen.family, phase:chosen.phase });
+    let pool = candidates.length ? candidates : allowed;
+    if (config.testOut && config.requiredFamilies?.length){
+      const seenFamilies = new Set(steps.map(step => step.family));
+      const missingFamilies = config.requiredFamilies.filter(family => !seenFamilies.has(family));
+      const missingPool = pool.filter(move => missingFamilies.includes(move.family));
+      const slotsLeft = middleCount - i;
+      if (missingPool.length && (slotsLeft <= missingFamilies.length + 3 || rng() < 0.42)){
+        pool = missingPool;
+      }
+    }
+    const chosen = afWeightedPick(rng, pool, prevMove, i + 1, steps, config);
+    const sideType = afMoveSideType(chosen);
+    const side = afChooseSide(rng, chosen, steps[steps.length - 1], startSide);
+    steps.push({ index:steps.length + 1, start:currentBase, moveId:chosen.id, name:chosen.name, kind:chosen.kind, end:chosen.end, family:chosen.family, phase:chosen.phase, side, sideType });
     currentBase = chosen.end;
     prevMove = chosen;
   }
 
-  let returnCandidates = afGetReturnCandidates(currentBase, startBase, flags, includeL1TF);
+  let returnCandidates = afGetReturnCandidates(currentBase, startBase, config);
   if (!returnCandidates.length){
-    const safeFlags = { ...flags, advancedEnabled:false, locomotionEnabled:false };
-    returnCandidates = afGetReturnCandidates(currentBase, startBase, safeFlags, false);
+    const safeConfig = { ...config, allowAdvanced:false, allowLocomotion:false };
+    returnCandidates = afGetReturnCandidates(currentBase, startBase, safeConfig);
   }
   if (!returnCandidates.length){
     returnCandidates = [{
@@ -1103,8 +1550,10 @@ function buildAnimalFlowSequence(seedKey, opts = {}){
       phase:"RECOVER"
     }];
   }
-  const finalMove = afWeightedPick(rng, returnCandidates, prevMove, steps.length, steps, flags);
-  steps.push({ index:steps.length + 1, start:currentBase, moveId:finalMove.id, name:finalMove.name, kind:finalMove.kind, end:finalMove.end, family:finalMove.family, phase:finalMove.phase, isReturn:true });
+  const finalMove = afWeightedPick(rng, returnCandidates, prevMove, steps.length, steps, config);
+  const finalSideType = afMoveSideType(finalMove);
+  const finalSide = afChooseSide(rng, finalMove, steps[steps.length - 1], startSide);
+  steps.push({ index:steps.length + 1, start:currentBase, moveId:finalMove.id, name:finalMove.name, kind:finalMove.kind, end:finalMove.end, family:finalMove.family, phase:finalMove.phase, side:finalSide, sideType:finalSideType, isReturn:true });
 
   return {
     seedKey,
@@ -1113,17 +1562,22 @@ function buildAnimalFlowSequence(seedKey, opts = {}){
     startCue: `Set ${AF_BASE_LABEL[startBase]}`,
     endBase: finalMove.end,
     length,
-    includeTF: includeL1TF,
+    practiceMode: config.modeKey,
+    practiceLabel: config.label,
+    flowProfile: config.profileKey,
+    profileLabel: config.profile.label,
+    includeTF: config.includeTF,
     includeHB: !!opts.includeHB,
     hbEnabled: !!opts.includeHB,
-    advancedEnabled: flags.advancedEnabled,
-    locomotionEnabled: flags.locomotionEnabled,
+    advancedEnabled: config.allowAdvanced,
+    locomotionEnabled: config.allowLocomotion,
     engine: "closed-loop",
     steps
   };
 }
 function generateBestAnimalFlowSequence(seedKey, opts = {}){
-  const tries = 7;
+  const config = getPracticeConfig(opts);
+  const tries = config.testOut ? 120 : 10;
   let best = null;
   let bestScore = -Infinity;
   for (let i = 0; i < tries; i++){
@@ -1135,7 +1589,7 @@ function generateBestAnimalFlowSequence(seedKey, opts = {}){
       bestScore = score;
     }
   }
-  return { ...best, qualityScore: bestScore };
+  return { ...best, qualityScore: bestScore, validation: afValidateFlow(best) };
 }
 /* ===========================
    Composer 2.0: Beam search
@@ -1428,6 +1882,9 @@ function mirrorFlow(flow){
   const mirrored = deepCopy(flow);
   mirrored.startSide = flow.startSide==="L"?"R":"L";
   mirrored.steps = (flow.steps||[]).map(s=>{
+    if (s.moveId && AF_MOVES[s.moveId] && s.side){
+      return {...s, side: (s.side==="L"?"R":"L")};
+    }
     // Scored/legacy flow steps
     if (s.moveId){
       const m = MOVES[s.moveId];
@@ -1572,6 +2029,8 @@ const ui = {
   pillLine: document.getElementById("pillLine"),
   flowTitle: document.getElementById("flowTitle"),
   flowList: document.getElementById("flowList"),
+  writtenFlow: document.getElementById("writtenFlow"),
+  validationBox: document.getElementById("validationBox"),
   modePieces: document.getElementById("modePieces"),
   modeLinked: document.getElementById("modeLinked"),
   modeTimed: document.getElementById("modeTimed"),
@@ -1599,10 +2058,19 @@ badgeStep: document.getElementById("badgeStep"),
   btnPrev: document.getElementById("btnPrev"),
   btnNext: document.getElementById("btnNext"),
   btnRep: document.getElementById("btnRep"),
+  btnCopyCallout: document.getElementById("btnCopyCallout"),
+  btnCopyWritten: document.getElementById("btnCopyWritten"),
+  btnCopyPlan: document.getElementById("btnCopyPlan"),
+  btnFinish: document.getElementById("btnFinish"),
 soundOn: document.getElementById("soundOn"),
   wakeOn: document.getElementById("wakeOn"),
+  practiceMode: document.getElementById("practiceMode"),
+  flowProfile: document.getElementById("flowProfile"),
+  progressionLevel: document.getElementById("progressionLevel"),
   hbOn: document.getElementById("hbOn"),
   historyBox: document.getElementById("historyBox"),
+  coverageBox: document.getElementById("coverageBox"),
+  sessionLogBox: document.getElementById("sessionLogBox"),
   btnClear: document.getElementById("btnClear"),
   currentTab:"pieces"
 };
@@ -1613,19 +2081,32 @@ function renderPills(flow){
   ui.pillLine.innerHTML = "";
   if (!flow) return;
   const hb = flow.hbEnabled ? "HB" : null;
+  const validation = flow.validation || afValidateFlow(flow);
+  flow.validation = validation;
+  const modeInfo = `<b>${flow.practiceLabel || AF_MODE[flow.practiceMode]?.label || "L1 Foundation"}</b>`;
+  const profileInfo = flow.profileLabel || AF_PROFILE[flow.flowProfile]?.label || "Balanced";
   const baseInfo = flow.startBase ? `Start <b>${AF_BASE_LABEL[flow.startBase] || flow.startBase}</b>` : `Start <b>${flow.startSide}</b>`;
   const loopInfo = `<b>${flow.steps?.length || 0}</b> moves`;
-  ui.pillLine.innerHTML = [baseInfo, loopInfo, hb].filter(Boolean).map(x=>`<span>${x}</span>`).join(`<span> </span>`);
+  const qualityInfo = `<b>${validation.score}</b>/100`;
+  ui.pillLine.innerHTML = [modeInfo, profileInfo, baseInfo, loopInfo, qualityInfo, hb].filter(Boolean).map(x=>`<span>${x}</span>`).join(`<span> </span>`);
 }
 
 function renderFlowList(flow){
   ui.flowList.innerHTML="";
+  if (ui.writtenFlow){
+    ui.writtenFlow.style.display = "none";
+    ui.writtenFlow.textContent = "";
+  }
+  if (ui.validationBox){
+    ui.validationBox.style.display = "none";
+    ui.validationBox.textContent = "";
+  }
   if (!flow){ ui.flowTitle.textContent="—"; return; }
 
   // Title (PURE flows don't have base/feature)
   if (flow.steps && flow.steps.length && !flow.base){
     if (flow.startBase){
-      ui.flowTitle.textContent = `Start in ${AF_BASE_LABEL[flow.startBase] || flow.startBase}`;
+      ui.flowTitle.textContent = `Set ${AF_BASE_LABEL[flow.startBase] || flow.startBase}`;
     } else {
       ui.flowTitle.textContent = `${flow.steps.length} moves`;
     }
@@ -1634,6 +2115,18 @@ function renderFlowList(flow){
   }
 
   const active = getActiveFlow() || flow;
+  if (ui.writtenFlow){
+    ui.writtenFlow.style.display = "";
+    ui.writtenFlow.textContent = `Written flow:\n${afWrittenFlow(active)}`;
+  }
+  if (ui.validationBox){
+    const validation = active.validation || afValidateFlow(active);
+    active.validation = validation;
+    const wins = validation.wins.length ? `Works: ${validation.wins.join(", ")}` : "Works: basic structure";
+    const issues = validation.issues.length ? `Watch: ${validation.issues.join(" ")}` : "Watch: no structural issues flagged";
+    ui.validationBox.style.display = "";
+    ui.validationBox.textContent = `Flow check: ${validation.grade} (${validation.score}/100)\n${wins}\n${issues}`;
+  }
 
   (active.steps||[]).forEach((s,i)=>{
     const el=document.createElement("div");
@@ -1652,16 +2145,20 @@ function renderFlowList(flow){
       tags.push(`<span class="tag">${m.type}</span>`);
       if (m.type !== "SET" && (m.tags||[]).length) tags.push(`<span class="tag">${m.tags[0]}</span>`);
     } else {
-      tags.push(`<span class="tag">${escapeHTML(s.phase || s.kind || "PURE")}</span>`);
+      tags.push(`<span class="tag">${escapeHTML(s.kind || "MOVE")}</span>`);
+      if (s.phase) tags.push(`<span class="tag">${escapeHTML(s.phase)}</span>`);
       // If we have start/end shapes, show them as tiny hints
       if (s.start && s.end) tags.push(`<span class="tag">${escapeHTML((AF_BASE_LABEL[s.start] || s.start) + "→" + (AF_BASE_LABEL[s.end] || s.end))}</span>`);
+      const transition = afTransitionCommand(active.steps[i - 1], s, active.steps[i + 1]);
+      if (transition) tags.push(`<span class="tag">${escapeHTML(transition)}</span>`);
       if (s.isReturn) tags.push(`<span class="tag">RETURN</span>`);
     }
 
     el.innerHTML = `
       <div class="idx">${i+1}</div>
       <div style="flex:1">
-        <div class="main">${escapeHTML(safeStepLabel(s, active.startSide || runner.side))}</div>
+        <div class="main">${escapeHTML(s.moveId && AF_MOVES[s.moveId] ? afFormatManualCallOut(active.steps, i, active.startSide || runner.side) : safeStepLabel(s, active.startSide || runner.side))}</div>
+        <div class="hint" style="margin-top:4px">${escapeHTML(afStepCues(s)[0])}</div>
         <div class="miniTags">${tags.join("")}</div>
       </div>`;
 
@@ -1699,6 +2196,61 @@ function renderHistory(){
       </div>`;
   }).join("");
 }
+function updateCoverage(flow){
+  if (!flow?.steps?.length) return;
+  const c = getCoverage();
+  flow.steps.forEach(step=>{
+    const key = step.moveId || step.name;
+    if (!key) return;
+    const row = c[key] || { name: step.name, count:0, last:null };
+    row.name = step.name;
+    row.count++;
+    row.last = flow.date || todayISO();
+    c[key] = row;
+  });
+  setCoverage(c);
+}
+function renderCoverage(){
+  if (!ui.coverageBox) return;
+  const c = getCoverage();
+  const ids = Object.keys(AF_MOVES);
+  const rows = ids.map(id => ({ id, name:AF_MOVES[id].name, count:c[id]?.count || 0, last:c[id]?.last || "—" }))
+    .sort((a,b)=>a.count-b.count || a.name.localeCompare(b.name));
+  const practiced = rows.filter(r=>r.count>0).length;
+  const least = rows.slice(0,10).map(r=>`${r.name}: ${r.count}`).join("<br>");
+  ui.coverageBox.innerHTML = `${practiced}/${rows.length} movements seen in generated flows.<br><br>${least || "No coverage yet."}`;
+}
+function finishSession(){
+  if (!currentFlow) return;
+  const validation = currentFlow.validation || afValidateFlow(currentFlow);
+  const log = getSessionLog();
+  log.unshift({
+    date: todayISO(),
+    mode: currentFlow.practiceLabel || currentFlow.practiceMode,
+    profile: currentFlow.profileLabel || currentFlow.flowProfile,
+    score: validation.score,
+    flows: runner.flowsDone,
+    reps: runner.reps,
+    minutes: Math.round((runner.timerTotal - runner.timerLeft) / 60),
+    written: afWrittenFlow(currentFlow)
+  });
+  setSessionLog(log);
+  renderSessionLog();
+  beep(1000,80);
+}
+function renderSessionLog(){
+  if (!ui.sessionLogBox) return;
+  const log = getSessionLog().slice(0,8);
+  if (!log.length){ ui.sessionLogBox.textContent = "No finished sessions yet."; return; }
+  ui.sessionLogBox.innerHTML = log.map(x=>`
+    <div style="margin-bottom:8px">
+      <span class="tag">${escapeHTML(x.date)}</span>
+      <span class="tag">${escapeHTML(x.mode)}</span>
+      <span class="tag">${escapeHTML(String(x.score))}/100</span>
+      <span class="tag">${escapeHTML(String(x.flows))} flows</span>
+      <span class="tag">${escapeHTML(String(x.reps))} reps</span>
+    </div>`).join("");
+}
 
 function renderRunner(){
   if (!currentFlow){
@@ -1719,15 +2271,17 @@ function renderRunner(){
 
   const flow = getActiveFlow();
   const step = flow.steps[runner.stepIndex];
-  const call = safeStepLabel(step, runner.side);
+  const call = step?.moveId && AF_MOVES[step.moveId]
+    ? afFormatManualCallOut(flow.steps, runner.stepIndex, runner.side)
+    : safeStepLabel(step, runner.side);
   const sideAware = hasSideSpecificSteps(flow);
   const startCue = flow.startCue || (flow.startBase ? `Set ${AF_BASE_LABEL[flow.startBase] || flow.startBase}` : "");
 
   let guidance="";
   if (runner.mode==="pieces"){
     const reps=parseInt(ui.piecesReps.value,10);
-    guidance = !sideAware
-      ? `${reps} reps per side. Learn each piece cleanly and with control.`
+    guidance = !sideAware || !step?.side
+      ? `${reps} quality reps. Use both sides when the call-out names a side.`
       : ui.piecesBothSides.checked
       ? `${reps} reps on ${runner.side}, then ${reps} on ${runner.side==="L"?"R":"L"}.`
       : `${reps} reps on ${runner.side}.`;
@@ -1747,7 +2301,8 @@ function renderRunner(){
     guidance = `${guidance}\n\nAfter this step: ${startCue} and loop again.`;
   }
 
-  ui.calloutBox.textContent = `${call}\n\n${guidance}`;
+  const cueText = afStepCues(step).map(x=>`- ${x}`).join("\n");
+  ui.calloutBox.textContent = `${call}\n\n${guidance}\n\nCue:\n${cueText}`;
   ui.stats.style.display="";
   ui.statFlows.textContent = String(runner.flowsDone);
   ui.statReps.textContent = String(runner.reps);
@@ -1796,14 +2351,14 @@ function pushHistoryIfMissing(flow){
 const DRILL_POOL = [
   { label:"Underswitch", both:true },
   { label:"Side Kickthrough", both:true },
-  { label:"Scorpion", both:true },
+  { label:"Scorpion Switch", both:true },
   { label:"Front Kickthrough", both:true },
   { label:"Ape Reach", both:true },
-  { label:"Beast hold (10–20s)", both:false },
-  { label:"Crab hold (10–20s)", both:false },
-  { label:"Beast travel (1–2 reps)", both:true },
-  { label:"Crab reach step (1–2 reps)", both:true },
-  { label:"Wave unload/reload (1–2 reps)", both:true },
+  { label:"Static Beast (10–20s)", both:false },
+  { label:"Static Crab (10–20s)", both:false },
+  { label:"Forward Traveling Beast", both:true },
+  { label:"Forward Traveling Crab", both:true },
+  { label:"Wave Unload", both:false },
 ];
 
 function pickDailyDrills(rng, n=4){
@@ -1845,7 +2400,16 @@ function renderHBPractice(){
 function generateToday({override=false}={}){
   const date=todayISO();
   const stored=getTodayFlow();
-  if (stored && stored.date===date && !override){
+  const wantedMode = ui.practiceMode?.value || "l1_foundation";
+  const wantedProfile = ui.flowProfile?.value || "balanced";
+  const hbEnabled = ui.hbOn.checked;
+  const storedMatchesSettings =
+    stored &&
+    stored.practiceMode === wantedMode &&
+    stored.flowProfile === wantedProfile &&
+    stored.progressionLevel === (ui.progressionLevel?.value || "basics") &&
+    !!stored.hbEnabled === !!hbEnabled;
+  if (stored && stored.date===date && storedMatchesSettings && !override){
     currentFlow=stored;
     pushHistoryIfMissing(currentFlow);
     resetRunner(false);
@@ -1859,22 +2423,25 @@ function generateToday({override=false}={}){
     return;
   }
 
-  const hbEnabled = ui.hbOn.checked;
   const seedKey = override ? `${date}#${Date.now()}` : date;
   const rng = mulberry32(hashStrToSeed(seedKey));
   const drills = pickDailyDrills(rng, 4);
   const flow = generateBestAnimalFlowSequence(seedKey, {
     length: "random",
     startBase: "random",
-    includeTF: false,
+    practiceMode: wantedMode,
+    flowProfile: wantedProfile,
+    progressionLevel: ui.progressionLevel?.value || "basics",
     includeHB: hbEnabled
   });
   flow.date = date;
   flow.drills = drills;
+  flow.progressionLevel = ui.progressionLevel?.value || "basics";
 
   currentFlow=flow;
   setTodayFlow(flow);
   pushHistoryIfMissing(flow);
+  updateCoverage(flow);
 
   resetRunner(false);
   renderPills(flow);
@@ -1883,6 +2450,8 @@ function generateToday({override=false}={}){
   renderHBPractice();
   renderRunner();
   renderHistory();
+  renderCoverage();
+  renderSessionLog();
   saveSession();
   beep(1040,90);
 }
@@ -1905,6 +2474,10 @@ ui.btnResume.addEventListener("click", async ()=>{
     ui.linkedFlows.value = pack.ui.linkedFlows ?? ui.linkedFlows.value;
     ui.timedMinutes.value = pack.ui.timedMinutes ?? ui.timedMinutes.value;
     if (ui.microBreakN) ui.microBreakN.value = pack.ui.microBreakN ?? ui.microBreakN.value;
+    if (ui.practiceMode) ui.practiceMode.value = pack.ui.practiceMode ?? ui.practiceMode.value;
+    if (ui.flowProfile) ui.flowProfile.value = pack.ui.flowProfile ?? ui.flowProfile.value;
+    if (ui.progressionLevel) ui.progressionLevel.value = pack.ui.progressionLevel ?? ui.progressionLevel.value;
+    if (typeof pack.ui.hbOn === "boolean") ui.hbOn.checked = pack.ui.hbOn;
 
     setMode(pack.ui.tab || "pieces");
   }
@@ -1950,11 +2523,27 @@ ui.btnRep.addEventListener("click", ()=>{
   beep(520,40);
   saveSession(); renderRunner();
 });
+ui.btnCopyCallout.addEventListener("click", ()=>{ if (currentFlow) copyText(afFullCallOut(currentFlow)); });
+ui.btnCopyWritten.addEventListener("click", ()=>{ if (currentFlow) copyText(afWrittenFlow(currentFlow)); });
+ui.btnCopyPlan.addEventListener("click", ()=>{ if (currentFlow) copyText(afPracticePlan(currentFlow)); });
+ui.btnFinish.addEventListener("click", finishSession);
 
 ui.soundOn.addEventListener("change", ()=>{ const s=getSettings(); s.soundOn=ui.soundOn.checked; setSettings(s); });
 ui.wakeOn.addEventListener("change", async ()=>{
   const s=getSettings(); s.wakeOn=ui.wakeOn.checked; setSettings(s);
   if (ui.wakeOn.checked) await acquireWakeLock(); else await releaseWakeLock();
+});
+ui.practiceMode.addEventListener("change", ()=>{
+  const s=getSettings(); s.practiceMode=ui.practiceMode.value; setSettings(s);
+  generateToday({override:true});
+});
+ui.flowProfile.addEventListener("change", ()=>{
+  const s=getSettings(); s.flowProfile=ui.flowProfile.value; setSettings(s);
+  generateToday({override:true});
+});
+ui.progressionLevel.addEventListener("change", ()=>{
+  const s=getSettings(); s.progressionLevel=ui.progressionLevel.value; setSettings(s);
+  generateToday({override:true});
 });
 ui.hbOn.addEventListener("change", ()=>{
   const s=getSettings(); s.hbOn=ui.hbOn.checked; setSettings(s);
@@ -1969,9 +2558,11 @@ ui.btnClear.addEventListener("click", ()=>{
   localStorage.removeItem(LS.HISTORY);
   localStorage.removeItem(LS.SESSION);
   localStorage.removeItem(LS.TODAY);
+  localStorage.removeItem(LS.COVERAGE);
+  localStorage.removeItem(LS.LOG);
   currentFlow=null;
   resetRunner(false);
-  renderPills(null); renderFlowList(null); renderRunner(); renderHistory();
+  renderPills(null); renderFlowList(null); renderRunner(); renderHistory(); renderCoverage(); renderSessionLog();
 });
 
 /* ===========================
@@ -1981,6 +2572,9 @@ ui.btnClear.addEventListener("click", ()=>{
   const s=getSettings();
   if (typeof s.soundOn==="boolean") ui.soundOn.checked=s.soundOn;
   if (typeof s.wakeOn==="boolean") ui.wakeOn.checked=s.wakeOn;
+  if (typeof s.practiceMode==="string" && AF_MODE[s.practiceMode]) ui.practiceMode.value=s.practiceMode;
+  if (typeof s.flowProfile==="string" && AF_PROFILE[s.flowProfile]) ui.flowProfile.value=s.flowProfile;
+  if (typeof s.progressionLevel==="string") ui.progressionLevel.value=s.progressionLevel;
   if (typeof s.hbOn==="boolean") ui.hbOn.checked=s.hbOn;
 
 
@@ -1998,12 +2592,18 @@ ui.btnClear.addEventListener("click", ()=>{
       ui.linkedFlows.value = pack.ui.linkedFlows ?? ui.linkedFlows.value;
       ui.timedMinutes.value = pack.ui.timedMinutes ?? ui.timedMinutes.value;
       if (ui.microBreakN) ui.microBreakN.value = pack.ui.microBreakN ?? ui.microBreakN.value;
+      if (ui.practiceMode) ui.practiceMode.value = pack.ui.practiceMode ?? ui.practiceMode.value;
+      if (ui.flowProfile) ui.flowProfile.value = pack.ui.flowProfile ?? ui.flowProfile.value;
+      if (ui.progressionLevel) ui.progressionLevel.value = pack.ui.progressionLevel ?? ui.progressionLevel.value;
+      if (typeof pack.ui.hbOn === "boolean") ui.hbOn.checked = pack.ui.hbOn;
   
     }
   }
 
   setMode(ui.currentTab);
   renderHistory();
+  renderCoverage();
+  renderSessionLog();
 
   if (currentFlow){
     resetRunner(false);
