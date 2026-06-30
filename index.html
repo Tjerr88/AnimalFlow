@@ -13,7 +13,7 @@
       --muted:#9fb0c3;
       --border:rgba(255,255,255,.10);
       --accent:rgba(123,220,255,.85);
-      --radius:16px;
+      --radius:8px;
       --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
     }
@@ -23,27 +23,77 @@
       margin:0; font-family:var(--sans); color:var(--text); background:var(--bg);
       padding:14px; padding-bottom: calc(14px + env(safe-area-inset-bottom));
     }
-    .wrap{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
-    header{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
-    h1{margin:0;font-size:18px;letter-spacing:.2px}
+    .wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+    header{display:flex;justify-content:space-between;gap:12px;align-items:center}
+    h1{margin:0;font-size:20px;letter-spacing:0}
+    h2{margin:0;font-size:15px;letter-spacing:0}
     .sub{color:var(--muted);font-size:12.5px;line-height:1.35;margin-top:6px;max-width:54ch}
     .topActions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
     .quickControls{
       display:grid;
       grid-template-columns:repeat(3, minmax(160px, 1fr));
       gap:10px;
-      border:1px solid var(--border);
-      border-radius:var(--radius);
-      background:rgba(255,255,255,.025);
-      padding:10px 12px;
+      margin-top:10px;
     }
     .controlField{display:flex;flex-direction:column;gap:6px}
     .controlField label{color:var(--muted);font-size:12px}
     @media (max-width: 560px){ .quickControls{grid-template-columns:1fr} }
+    .guide{
+      display:grid;
+      grid-template-columns:1.2fr .9fr .9fr;
+      gap:10px;
+      align-items:stretch;
+    }
+    .guideStep{
+      border:1px solid var(--border);
+      border-radius:8px;
+      background:rgba(255,255,255,.022);
+      padding:12px;
+      min-width:0;
+    }
+    .guideHead{display:flex;gap:10px;align-items:flex-start}
+    .stepNum{
+      display:grid;
+      place-items:center;
+      width:28px;
+      height:28px;
+      border-radius:8px;
+      background:rgba(123,220,255,.12);
+      border:1px solid rgba(123,220,255,.28);
+      color:var(--text);
+      font-weight:750;
+      flex:0 0 auto;
+    }
+    .guideStep p{margin:4px 0 0;color:var(--muted);font-size:12px;line-height:1.35}
+    .guideStatus{
+      margin-top:10px;
+      padding:9px 10px;
+      border-radius:8px;
+      background:rgba(93,255,179,.055);
+      border:1px solid rgba(93,255,179,.20);
+      color:var(--text);
+      font-size:12px;
+      line-height:1.35;
+    }
+    .nextHint{
+      margin-top:10px;
+      padding:9px 10px;
+      border-radius:8px;
+      background:rgba(255,255,255,.03);
+      border:1px solid var(--border);
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.35;
+    }
+    .topActions.guideActions{
+      margin-top:10px;
+      justify-content:flex-start;
+    }
+    .topActions.guideActions button:first-child{font-size:14px}
     button{
       appearance:none; border:1px solid var(--border);
       background:transparent; color:var(--text);
-      padding:9px 11px; border-radius:12px;
+      padding:9px 11px; border-radius:8px;
       font-weight:650; cursor:pointer; font-size:13px;
       transition: background .15s ease, border-color .15s ease, transform .04s ease;
     }
@@ -55,14 +105,16 @@
     button.ghost{opacity:.9}
     button:disabled{opacity:.55; cursor:not-allowed}
 
-    .grid{display:grid;grid-template-columns:1.35fr .65fr;gap:12px}
+    .grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:12px;align-items:start}
     @media (max-width: 900px){ .grid{grid-template-columns:1fr} }
 
     .card{
-      background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015));
+      background:rgba(255,255,255,.02);
       border:1px solid var(--border); border-radius:var(--radius);
       overflow:hidden;
     }
+    aside.card{position:sticky;top:14px}
+    @media (max-width: 900px){ aside.card{position:static} }
     .hd{
       padding:12px 12px 10px;
       border-bottom:1px solid var(--border);
@@ -74,7 +126,7 @@
     .bd{padding:12px}
     .tabs{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
     .tab{
-      padding:7px 9px;border-radius:999px;border:1px solid var(--border);
+      padding:7px 9px;border-radius:8px;border:1px solid var(--border);
       background:transparent;color:var(--muted);font-size:12px;cursor:pointer;
     }
     .tab.active{color:var(--text);border-color:rgba(123,220,255,.28);background:rgba(123,220,255,.08)}
@@ -89,7 +141,7 @@
     .step{
       border:1px solid var(--border);
       background:rgba(255,255,255,.015);
-      border-radius:14px; padding:9px 11px;
+      border-radius:8px; padding:9px 11px;
       display:flex; gap:10px; align-items:flex-start;
     }
     .idx{font-family:var(--mono); font-size:12px; color:var(--muted); width:22px; flex:0 0 auto; margin-top:1px}
@@ -99,9 +151,9 @@
 
     .callout{
       border:1px solid var(--border);
-      border-radius:14px;
+      border-radius:8px;
       padding:10px 12px;
-      background:rgba(0,0,0,.18);
+      background:rgba(0,0,0,.14);
       font-family:var(--mono);
       font-size:12px;
       line-height:1.45;
@@ -121,11 +173,14 @@
     .kv{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;margin-bottom:10px}
     .kv label{color:var(--muted);font-size:12px}
     select,input[type="number"]{
-      width:100%; padding:9px 10px;border-radius:12px;border:1px solid var(--border);
+      width:100%; padding:9px 10px;border-radius:8px;border:1px solid var(--border);
       background:rgba(0,0,0,.18); color:var(--text); font-size:13px; outline:none;
+      color-scheme:dark;
     }
+    select:focus,input[type="number"]:focus{border-color:rgba(123,220,255,.45);box-shadow:0 0 0 3px rgba(123,220,255,.08)}
+    select option{background:#101721;color:#e8f0fb}
     input[type="checkbox"]{transform:scale(1.05)}
-    details{border:1px solid var(--border); border-radius:14px; overflow:hidden; background:rgba(255,255,255,.01)}
+    details{border:1px solid var(--border); border-radius:8px; overflow:hidden; background:rgba(255,255,255,.01)}
     summary{cursor:pointer; padding:10px 12px; color:var(--muted); font-size:12px; list-style:none}
     summary::-webkit-details-marker{display:none}
     details[open] summary{border-bottom:1px solid var(--border); color:var(--text)}
@@ -136,7 +191,7 @@
     /* ===== Manual blocks (Warm-up / Drill / Cool-down) ===== */
     .block{
       border:1px solid var(--border);
-      border-radius:14px;
+      border-radius:8px;
       background:rgba(255,255,255,.03);
       padding:12px;
       margin:12px 0;
@@ -183,6 +238,59 @@
       grid-template-columns:1fr;
       gap:12px;
     }
+    .flowTools{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-bottom:10px;
+    }
+    .flowTools details{min-width:0}
+    .flowCheck{
+      margin-bottom:10px;
+      border-color:rgba(93,255,179,.22);
+      background:rgba(93,255,179,.045);
+      font-family:var(--sans);
+    }
+    .writtenBox{
+      margin:0;
+      max-height:120px;
+      overflow:auto;
+      background:rgba(255,255,255,.018);
+    }
+    .practicePanel{
+      border:1px solid var(--border);
+      border-radius:8px;
+      background:rgba(255,255,255,.012);
+      padding:10px;
+      margin-top:10px;
+    }
+    .modePanel{
+      border:1px solid var(--border);
+      border-radius:8px;
+      padding:10px;
+      background:rgba(255,255,255,.012);
+      margin-bottom:10px;
+    }
+    .runnerActions{
+      display:grid;
+      grid-template-columns:repeat(3, 1fr);
+      gap:8px;
+    }
+    .runnerActions button,.exportActions button{width:100%}
+    .exportActions{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px;
+    }
+    .smallTitle{color:var(--muted);font-size:12px;margin:0 0 8px}
+    @media (max-width: 700px){
+      header{align-items:flex-start;flex-direction:column}
+      .topActions{justify-content:flex-start}
+      .guide{grid-template-columns:1fr}
+      .flowTools{grid-template-columns:1fr}
+      .runnerActions,.exportActions{grid-template-columns:1fr}
+    }
+    @media (min-width:701px) and (max-width:980px){ .guide{grid-template-columns:1fr 1fr} .guideStep:first-child{grid-column:1 / -1} }
     @media(min-width:860px){
       .grid2{ grid-template-columns:1fr 1fr; }
     }
@@ -194,45 +302,78 @@
   <header>
     <div>
       <h1>Animal Flow Pure</h1>
-      <div class="appMeta">Daily standalone flow.</div>
+      <div class="appMeta">Manual-based flow practice.</div>
       <div class="pillline" id="pillLine"></div>
-    </div>
-    <div class="topActions">
-      <button class="primary" id="btnNew">Generate</button>
-      <button class="ghost" id="btnRegen">New Flow</button>
-      <button class="ghost" id="btnResume">Resume</button>
     </div>
   </header>
 
-  <div class="quickControls">
-    <div class="controlField">
-      <label>Practice Mode</label>
-      <select id="practiceMode">
-        <option value="l1_foundation" selected>L1 Foundation</option>
-        <option value="l1_complete">L1 + Traveling</option>
-        <option value="l1_testout">L1 Test-Out Prep</option>
-        <option value="l2_core">L2 Core</option>
-        <option value="l2_kinetic">L2 Kinetic</option>
-        <option value="l2_testout">L2 Test-Out Prep</option>
-      </select>
-    </div>
-    <div class="controlField">
-      <label>Flow Feel</label>
-      <select id="flowProfile">
-        <option value="balanced" selected>Balanced</option>
-        <option value="technical">Technical</option>
-        <option value="kinetic">Kinetic</option>
-        <option value="conditioning">Conditioning</option>
-      </select>
-    </div>
-    <div class="controlField">
-      <label>Progression</label>
-      <select id="progressionLevel">
-        <option value="basics" selected>Basics</option>
-        <option value="dynamic">Dynamic</option>
-        <option value="advanced">Advanced</option>
-      </select>
-    </div>
+  <div class="guide" aria-label="App steps">
+    <section class="guideStep">
+      <div class="guideHead">
+        <div class="stepNum">1</div>
+        <div>
+          <h2>Choose Training</h2>
+          <p>Begin hier. Deze drie keuzes bepalen welke manual-only flow je krijgt.</p>
+        </div>
+      </div>
+      <div class="quickControls">
+        <div class="controlField">
+          <label>Practice Mode</label>
+          <select id="practiceMode">
+            <option value="l1_foundation" selected>L1 Foundation</option>
+            <option value="l1_complete">L1 + Traveling</option>
+            <option value="l1_testout">L1 Test-Out Prep</option>
+            <option value="l2_core">L2 Core</option>
+            <option value="l2_kinetic">L2 Kinetic</option>
+            <option value="l2_testout">L2 Test-Out Prep</option>
+          </select>
+        </div>
+        <div class="controlField">
+          <label>Flow Feel</label>
+          <select id="flowProfile">
+            <option value="balanced" selected>Balanced</option>
+            <option value="technical">Technical</option>
+            <option value="kinetic">Kinetic</option>
+            <option value="conditioning">Conditioning</option>
+          </select>
+        </div>
+        <div class="controlField">
+          <label>Progression</label>
+          <select id="progressionLevel">
+            <option value="basics" selected>Basics</option>
+            <option value="dynamic">Dynamic</option>
+            <option value="advanced">Advanced</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <section class="guideStep">
+      <div class="guideHead">
+        <div class="stepNum">2</div>
+        <div>
+          <h2>Create Flow</h2>
+          <p>Use Generate for today. New Flow forces a different flow with the same choices.</p>
+        </div>
+      </div>
+      <div class="topActions guideActions">
+        <button class="primary" id="btnNew">Generate</button>
+        <button class="ghost" id="btnRegen">New Flow</button>
+        <button class="ghost" id="btnResume">Resume</button>
+      </div>
+      <div class="guideStatus" id="guideStatus">No flow loaded yet. Choose step 1, then press Generate.</div>
+    </section>
+
+    <section class="guideStep">
+      <div class="guideHead">
+        <div class="stepNum">3</div>
+        <div>
+          <h2>Practice On The Right</h2>
+          <p>Choose Pieces, Linked, or Flow above the generated flow. Then use the runner on the right with Start and Next.</p>
+        </div>
+      </div>
+      <div class="nextHint">Best order: Pieces first, then Linked, then Flow.</div>
+    </section>
   </div>
 
   <div class="grid">
@@ -240,6 +381,7 @@
       <div class="hd">
         <div class="left">
           
+          <div class="k">Generated Flow</div>
           <div class="v" id="flowTitle">—</div>
         </div>
         <div class="tabs" id="tabs">
@@ -249,6 +391,9 @@
         </div>
       </div>
       <div class="bd">
+      <details class="practicePanel">
+        <summary>Practice Prep</summary>
+        <div class="detailsBody">
       <div id="hbPractice" class="block" style="display:none">
         <div class="bhd">
           <div class="k">Hand Balance Practice (optional)</div>
@@ -327,16 +472,25 @@
           <div class="note">Keep these light and technical.</div>
         </div>
       </div>
+        </div>
+      </details>
 
       <div class="hr"></div>
 
+        <div class="callout flowCheck" id="validationBox" style="display:none"></div>
         <div class="flowlist" id="flowList"></div>
-        <div class="callout" id="writtenFlow" style="margin-top:10px;display:none"></div>
-        <div class="callout" id="validationBox" style="margin-top:10px;display:none"></div>
+        <div class="flowTools">
+          <details>
+            <summary>Written Flow</summary>
+            <div class="detailsBody">
+              <div class="callout writtenBox" id="writtenFlow" style="display:none"></div>
+            </div>
+          </details>
+          <details>
+            <summary>Practice Settings</summary>
+            <div class="detailsBody">
 
-        <div class="hr"></div>
-
-        <div id="modePieces" class="mode">
+        <div id="modePieces" class="mode modePanel">
           <div class="kv">
             <label>Reps per side</label>
             <select id="piecesReps">
@@ -352,7 +506,7 @@
           <div class="hint">5 reps per side to learn each piece with control.</div>
         </div>
 
-        <div id="modeLinked" class="mode" style="display:none">
+        <div id="modeLinked" class="mode modePanel" style="display:none">
           <div class="kv">
             <label>Linked cycles</label>
             <select id="linkedFlows">
@@ -364,7 +518,7 @@
           <div class="hint">1-3 linked cycles to get to know the flow.</div>
         </div>
 
-        <div id="modeTimed" class="mode" style="display:none">
+        <div id="modeTimed" class="mode modePanel" style="display:none">
           <div class="kv">
             <label>Flow time (minutes)</label>
             <select id="timedMinutes">
@@ -376,6 +530,9 @@
             </select>
           </div>
           <div class="hint">As many quality reps as possible within 10-30 minutes.</div>
+        </div>
+            </div>
+          </details>
         </div>
       
         <div class="hr"></div>
@@ -426,7 +583,7 @@
 
         <div class="hr"></div>
 
-        <div class="row">
+        <div class="runnerActions">
           <button class="good" id="btnStart">Start</button>
           <button class="warn" id="btnPause">Pause</button>
           <button class="bad" id="btnReset">Reset</button>
@@ -434,14 +591,15 @@
 
         <div class="hr"></div>
 
-        <div class="row">
+        <div class="runnerActions">
           <button id="btnPrev">Prev</button>
           <button class="primary" id="btnNext">Next</button>
           <button id="btnRep">Rep +1</button>
         </div>
         <div class="hr"></div>
 
-        <div class="row">
+        <div class="smallTitle">Export</div>
+        <div class="exportActions">
           <button id="btnCopyCallout">Copy Call-Out</button>
           <button id="btnCopyWritten">Copy Written</button>
           <button id="btnCopyPlan">Copy Plan</button>
@@ -475,24 +633,24 @@
               </div>
             </details>
 
-            <details style="margin-top:10px">
-              <summary>Coverage</summary>
-              <div class="detailsBody">
-                <div class="hint" id="coverageBox">—</div>
-              </div>
-            </details>
-
-            <details style="margin-top:10px">
-              <summary>Session Log</summary>
-              <div class="detailsBody">
-                <div class="hint" id="sessionLogBox">—</div>
-              </div>
-            </details>
-
             <div class="hr"></div>
             <div class="hint">
               Modes keep the movement library aligned with L1/L2 progressions; L2 Kinetic is the broadest option.
             </div>
+          </div>
+        </details>
+
+        <details style="margin-top:10px">
+          <summary>Coverage</summary>
+          <div class="detailsBody">
+            <div class="hint" id="coverageBox">—</div>
+          </div>
+        </details>
+
+        <details style="margin-top:10px">
+          <summary>Session Log</summary>
+          <div class="detailsBody">
+            <div class="hint" id="sessionLogBox">—</div>
           </div>
         </details>
       </div>
@@ -2027,6 +2185,7 @@ function advanceTimed(){
 =========================== */
 const ui = {
   pillLine: document.getElementById("pillLine"),
+  guideStatus: document.getElementById("guideStatus"),
   flowTitle: document.getElementById("flowTitle"),
   flowList: document.getElementById("flowList"),
   writtenFlow: document.getElementById("writtenFlow"),
@@ -2077,8 +2236,21 @@ soundOn: document.getElementById("soundOn"),
 
 let currentFlow = null;
 
+function renderGuideStatus(flow){
+  if (!ui.guideStatus) return;
+  if (!flow){
+    ui.guideStatus.textContent = "No flow loaded yet. Choose step 1, then press Generate.";
+    return;
+  }
+  const validation = flow.validation || afValidateFlow(flow);
+  const mode = flow.practiceLabel || AF_MODE[flow.practiceMode]?.label || "L1 Foundation";
+  const profile = flow.profileLabel || AF_PROFILE[flow.flowProfile]?.label || "Balanced";
+  ui.guideStatus.textContent = `Ready: ${mode}, ${profile}, ${flow.steps?.length || 0} moves, score ${validation.score}/100. Check the flow on the left; practice on the right with Start and Next.`;
+}
+
 function renderPills(flow){
   ui.pillLine.innerHTML = "";
+  renderGuideStatus(flow);
   if (!flow) return;
   const hb = flow.hbEnabled ? "HB" : null;
   const validation = flow.validation || afValidateFlow(flow);
